@@ -4,7 +4,7 @@ use App\Http\Controllers\EksporAbsensiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('filament.auth.login');
+    return redirect('/admin');
 });
 
 // Letakkan rute ini di dalam kelompok rute admin atau letakkan secara mandiri
