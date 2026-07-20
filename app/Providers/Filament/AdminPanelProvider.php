@@ -19,6 +19,8 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\View\PanelsRenderHook; // <--- Import kelas ini di bagian atas
+use Illuminate\Support\Facades\Blade;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -59,6 +61,23 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END, // Menempatkan tag di akhir bagian <head>
+                fn (): string => Blade::render('
+                    <!-- Open Graph / Meta Sosial Media -->
+                    <meta property="og:title" content="Absensi Digital - YPPRT" />
+                    <meta property="og:description" content="Sistem absensi santri, siswa, dan ustadz berbasis QR Code & RFID terintegrasi secara real-time." />
+                    <meta property="og:image" content="' . asset('images/og-preview.jpg') . '" />
+                    <meta property="og:url" content="' . url('/') . '" />
+                    <meta property="og:type" content="website" />
+
+                    <!-- Twitter/X Card -->
+                    <meta name="twitter:card" content="summary_large_image" />
+                    <meta name="twitter:title" content="Absensi Digital - YPPRT" />
+                    <meta name="twitter:description" content="Sistem absensi santri, siswa, dan ustadz berbasis QR Code & RFID terintegrasi." />
+                    <meta name="twitter:image" content="' . asset('images/og-preview.png') . '" />
+                '),
+            )
             ->authMiddleware([
                 Authenticate::class,
             ]);
