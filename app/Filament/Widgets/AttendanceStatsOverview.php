@@ -22,7 +22,7 @@ class AttendanceStatsOverview extends BaseWidget
         $siswaHadirCount = Absensi::where('tanggal', $today)
             ->where('absensable_type', Siswa::class)
             //tambahkan status kehadiran yang tepat wakt
-            ->whereIn('status_masuk', ['Tepat Waktu', 'Terlambat'])
+            ->whereIn('status_masuk', ['Tepat Waktu'])
             ->count();
 
         // 2. Hitung jumlah Guru yang sudah hadir hari ini
@@ -32,7 +32,7 @@ class AttendanceStatsOverview extends BaseWidget
 
         // 3. Hitung jumlah keterlambatan hari ini (Gabungan Siswa & Guru)
         $terlambatCount = Absensi::where('tanggal', $today)
-            ->where('status_masuk', ['Alpa'])
+            ->where('status_masuk', ['Alpa', 'Terlambat'])
             ->count();
 
         return [
