@@ -32,7 +32,7 @@ class AttendanceStatsOverview extends BaseWidget
 
         // 3. Hitung jumlah keterlambatan hari ini (Gabungan Siswa & Guru)
         $terlambatCount = Absensi::where('tanggal', $today)
-            ->where('status_masuk', ['Alpa', 'Terlambat'])
+            ->whereIn('status_masuk', ['Alpa', 'Terlambat'])
             ->count();
 
         return [
