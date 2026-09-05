@@ -23,7 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
     // TAMBAHKAN METODE WITHSCHEDULE DI SINI
     ->withSchedule(function (Schedule $schedule) {
         // Optimasi: Jalankan pemeriksaan dinamis setiap 10 menit untuk menghemat resource CPU
-        $schedule->command('app:process-daily-alpa')->everyTenMinutes();
+        $schedule->command('app:process-daily-alpa')->everyTenMinutes()
+        ->appendOutputTo(storage_path('logs/scheduler.log'));
     })
 
     ->create();
