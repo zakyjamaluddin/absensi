@@ -6,6 +6,7 @@ use App\Filament\Resources\Absensis\AbsensiResource;
 use App\Models\Absensi;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Schemas\Schema;
@@ -44,6 +45,43 @@ class ManageAbsensis extends ManageRecords
                         ->body('Data absensi berhasil dicatat secara manual.')
                         ->success()
                         ->send();
+                }),
+
+            // 2. TOMBOL SAKTI BARU: Ekspor Semua Kelas Sekaligus Berbasis Multi-Sheet
+            Action::make('ekspor_semua_kelas')
+                ->label('Ekspor Semua Kelas')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('success')
+                // Ambil daftar bulan & tahun dinamis dari database yang sudah kita buat sebelumnya
+                ->form([
+                    Select::make('bulan')
+                        ->label('Pilih Bulan')
+                        ->options(function () {
+                            $bulanQuery = Absensi::selectRaw('MONTH(tanggal) as month')->distinct()->orderBy('month', 'asc')->pluck('month')->toArray();
+                            $monthNames = [1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'];
+                            $bulanOptions = [];
+                            foreach ($bulanQuery as $m) {
+                                $bulanOptions[sprintf('%02d', $m)] = $monthNames[(int)$m];
+                            }
+                            return empty($bulanOptions) ? [now()->format('m') => now()->translatedFormat('F')] : $bulanOptions;
+                        })
+                        ->default(now()->format('m'))
+                        ->required(),
+
+                    Select::make('tahun')
+                        ->label('Pilih Tahun')
+                        ->options(function () {
+                            $tahunOptions = Absensi::selectRaw('YEAR(tanggal) as year')->distinct()->orderBy('year', 'desc')->pluck('year', 'year')->toArray();
+                            return empty($tahunOptions) ? [now()->year => now()->year] : $tahunOptions;
+                        })
+                        ->default(now()->year)
+                        ->required(),
+                ])
+                ->action(function (array $data) {
+                    return redirect()->route('admin.kelas.ekspor-semua', [
+                        'bulan' => $data['bulan'],
+                        'tahun' => $data['tahun'],
+                    ]);
                 }),
         ];
     }

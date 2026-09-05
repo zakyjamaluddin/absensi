@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Widgets;
 
 use App\Models\Absensi;
@@ -11,48 +10,51 @@ use Carbon\Carbon;
 
 class AttendanceStatsOverview extends BaseWidget
 {
-    // Fitur Live Polling: Dashboard akan otomatis refresh data setiap 15 detik secara real-time!
-    protected  ?string $pollingInterval = '15s';
+    protected ?string $pollingInterval = '15s';
+
+    // Urutan ke-2 (Tengah)
+    protected static ?int $sort = 2;
 
     protected function getStats(): array
     {
+        // Jalankan auto-process alpa harian (silent)
+        // \App\Models\Absensi::autoProcessAlpa();
+
         $today = Carbon::today()->toDateString();
 
-        // 1. Hitung jumlah Siswa yang sudah hadir hari ini
-        $siswaHadirCount = Absensi::where('tanggal', $today)
+        // 1. HITUNG SISWA SUDAH MASUK HARI INI (Tepat Waktu + Terlambat)
+        $sudahMasukCount = Absensi::where('tanggal', $today)
             ->where('absensable_type', Siswa::class)
-            //tambahkan status kehadiran yang tepat wakt
-            ->whereIn('status_masuk', ['Tepat Waktu'])
+            ->whereIn('status_masuk', ['Tepat Waktu', 'Terlambat'])
             ->count();
 
-        // 2. Hitung jumlah Guru yang sudah hadir hari ini
-        $guruHadirCount = Absensi::where('tanggal', $today)
-            ->where('absensable_type', Guru::class)
-            ->count();
-
-        // 3. Hitung jumlah keterlambatan hari ini (Gabungan Siswa & Guru)
+        // 2. HITUNG SISWA TERLAMBAT HARI INI
         $terlambatCount = Absensi::where('tanggal', $today)
-            ->whereIn('status_masuk', ['Alpa', 'Terlambat'])
+            ->where('absensable_type', Siswa::class)
+            ->where('status_masuk', 'Terlambat')
+            ->count();
+
+        // 3. HITUNG SISWA ALPA HARI INI
+        $alpaCount = Absensi::where('tanggal', $today)
+            ->where('absensable_type', Siswa::class)
+            ->where('status_masuk', 'Alpa')
             ->count();
 
         return [
-            // Stat 1: Kehadiran Siswa (Warna Biru/Info)
-            Stat::make('Siswa Hadir Hari Ini', $siswaHadirCount . ' Santri')
-                ->description('Santri yang sudah melakukan tap masuk')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('info'),
-
-            // Stat 2: Kehadiran Guru/Ustadz (Warna Hijau/Success)
-            Stat::make('Ustadz Hadir Hari Ini', $guruHadirCount . ' Orang')
-                ->description('Asatidzah yang sudah tap masuk')
-                ->descriptionIcon('heroicon-m-academic-cap')
+            Stat::make('Sudah Masuk Hari Ini', $sudahMasukCount . ' Siswa')
+                ->description('Total siswa yang sudah hadir di kelas')
+                ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
 
-            // Stat 3: Total Terlambat Hari Ini (Warna Merah/Danger jika ada yang terlambat)
-            Stat::make('Terlambat Hari Ini', $terlambatCount . ' Pelanggaran')
-                ->description('Total siswa & guru terlambat hari ini')
-                ->descriptionIcon('heroicon-m-exclamation-triangle')
-                ->color($terlambatCount > 0 ? 'danger' : 'gray'),
+            Stat::make('Terlambat Hari Ini', $terlambatCount . ' Siswa')
+                ->description('Siswa yang scan melewati jam masuk')
+                ->descriptionIcon('heroicon-m-clock')
+                ->color($terlambatCount > 0 ? 'warning' : 'gray'),
+
+            Stat::make('Alpa Hari Ini', $alpaCount . ' Siswa')
+                ->description('Siswa yang membolos/tidak hadir hari ini')
+                ->descriptionIcon('heroicon-m-user-minus')
+                ->color($alpaCount > 0 ? 'danger' : 'gray'),
         ];
     }
 }
