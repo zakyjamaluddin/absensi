@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->path('admin')
             ->login()
+            ->favicon(asset('logo.png'))
             ->colors([
                 'primary' => Color::Emerald,
             ])

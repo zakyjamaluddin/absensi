@@ -1,10 +1,15 @@
 <x-filament-widgets::widget>
-    <x-filament::section>
+    <!-- KONTENER GRADASI EMERALD LUXURY -->
+    <div style="
+        background: linear-gradient(135deg, #064e3b 0%, #0d9488 100%);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #047857;
+    ">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
 
-        <!-- TATA LETAK FLEXBOX UTAMA (Inline CSS - 100% Aman & Responsif) -->
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.5rem 0;">
-
-            <!-- SISI KIRI: Sapaan Hangat Dinamis -->
+            <!-- SISI KIRI: Sapaan Hangat & Tanggal Emas Lembut -->
             <div style="flex: 1; min-width: 250px;">
                 @php
                     $hour = now()->hour;
@@ -19,30 +24,31 @@
                     }
                 @endphp
 
-                <h1 class="custom-title" style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em; margin: 0; color: #111827;">
+                <h1 style="font-size: 1.625rem; font-weight: 800; letter-spacing: -0.025em; margin: 0; color: #ffffff;">
                     {{ $greeting }}, {{ auth()->user()->name }}! 👋
                 </h1>
 
-                <p class="custom-subtitle" style="font-size: 0.875rem; margin: 0.35rem 0 0 0; color: #6b7280; line-height: 1.4;">
-                    Hari ini adalah <strong style="color: #3b82f6;">{{ now()->translatedFormat('l, d F Y') }}</strong>.
+                <p style="font-size: 0.9rem; margin: 0.45rem 0 0 0; color: #f0fdf4; line-height: 1.5;">
+                    Hari ini adalah <strong style="color: #fcd34d; font-weight: 700;">{{ now()->translatedFormat('l, d F Y') }}</strong>.
                     Semoga aktivitas belajar mengajar hari ini diberkahi Allah SWT.
                 </p>
             </div>
 
-            <!-- SISI KANAN: Denyut Lampu Hijau Server Aktif -->
-            <div class="custom-badge" style="
+            <!-- SISI KANAN: Kapsul Transparan Berdenyut (Glassmorphism) -->
+            <div style="
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
-                background-color: #ecfdf5;
-                border: 1px solid #a7f3d0;
-                padding: 0.5rem 1rem;
-                border-radius: 0.5rem;
-                transition: all 0.2s;
+                background-color: rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 0.6rem 1.15rem;
+                border-radius: 9999px;
+                backdrop-filter: blur(4px);
             ">
-                <!-- Lampu Denyut Hijau (Animasi CSS bawaan) -->
-                <span style="display: inline-block; position: relative; width: 0.75rem; height: 0.75rem;">
-                    <span class="animate-ping" style="
+                <!-- Lampu Denyut Putih-Hijau di dalam Kapsul Transparan -->
+                <span style="display: inline-block; position: relative; width: 0.65rem; height: 0.65rem;">
+                    <!-- MENGGUNAKAN ANIMASI KUSTOM: custom-ping-animation -->
+                    <span class="custom-ping-animation" style="
                         position: absolute;
                         display: inline-flex;
                         width: 100%;
@@ -55,36 +61,54 @@
                         position: relative;
                         display: inline-flex;
                         border-radius: 9999px;
-                        width: 0.75rem;
-                        height: 0.75rem;
-                        background-color: #10b981;
+                        width: 0.65rem;
+                        height: 0.65rem;
                     "></span>
                 </span>
 
-                <span class="custom-badge-text" style="font-size: 0.75rem; font-weight: 700; color: #047857;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #ffffff; letter-spacing: 0.05em; text-transform: uppercase;">
                     Sistem Absensi Online Aktif
                 </span>
             </div>
 
         </div>
+    </div>
 
-        <!-- TRIK AGAR OTOMATIS COMPATIBLE DENGAN DARK MODE (Bebas Kompilasi) -->
-        <style>
-            /* Ketika Admin Panel dalam keadaan Dark Mode, timpa warnanya di sini */
-            .dark .custom-title {
-                color: #ffffff !important;
+    <!-- BLOK CSS ANIMASI DENYUT MURNI & DARK MODE -->
+    <style>
+        /* ANIMASI DENYUT CSS MURNI (100% Lancar di Semua Browser & Bebas Gagal Kompilasi) */
+        @keyframes custom-ping-keyframes {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
             }
-            .dark .custom-subtitle {
-                color: #9ca3af !important;
+            70% {
+                transform: scale(2.2);
+                opacity: 0;
             }
-            .dark .custom-badge {
-                background-color: #064e3b !important; /* Hijau gelap */
-                border-color: #047857 !important;
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
             }
-            .dark .custom-badge-text {
-                color: #a7f3d0 !important; /* Teks hijau terang */
-            }
-        </style>
+        }
 
-    </x-filament::section>
+        .custom-ping-animation {
+            animation: custom-ping-keyframes 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        /* Skenario Penyesuaian Dark Mode */
+        .dark .custom-title {
+            color: #ffffff !important;
+        }
+        .dark .custom-subtitle {
+            color: #9ca3af !important;
+        }
+        .dark .custom-badge {
+            background-color: #064e3b !important;
+            border-color: #047857 !important;
+        }
+        .dark .custom-badge-text {
+            color: #a7f3d0 !important;
+        }
+    </style>
 </x-filament-widgets::widget>
