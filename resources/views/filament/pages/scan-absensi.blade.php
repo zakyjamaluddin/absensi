@@ -11,7 +11,7 @@
             font-size: 0.875rem;
             cursor: pointer;
             border: 1px solid #d1d5db;
-            background-color: #1e3a8a;
+            background-color: #16804e;
             color: white;
             transition: all 0.2s;
         ">
@@ -147,7 +147,7 @@
                     secCamera.style.display = 'none';
 
                     // Update Style Tombol
-                    btnRfid.style.backgroundColor = '#1e3a8a';
+                    btnRfid.style.backgroundColor = '#16804e';
                     btnRfid.style.color = '#ffffff';
                     btnCamera.style.backgroundColor = '#ffffff';
                     btnCamera.style.color = '#374151';
@@ -167,7 +167,7 @@
                     secCamera.style.display = 'block';
 
                     // Update Style Tombol
-                    btnCamera.style.backgroundColor = '#1e3a8a';
+                    btnCamera.style.backgroundColor = '#16804e';
                     btnCamera.style.color = '#ffffff';
                     btnRfid.style.backgroundColor = '#ffffff';
                     btnRfid.style.color = '#374151';
