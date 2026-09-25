@@ -26,8 +26,8 @@ class ProcessDailyAlpa extends Command
         $today = Carbon::today()->toDateString();
 
         // 1. Cek libur pekanan (Kecuali jika dipicu MANUAL dari tombol)
-        if (!$this->option('manual') && Carbon::today()->isSunday()) {
-            $this->info('Hari ini adalah hari Minggu. Proses Alpa diabaikan.');
+        if (!$this->option('manual') && Carbon::today()->isFriday()) {
+            $this->info('Hari ini adalah hari Jumat. Proses Alpa diabaikan.');
             return Command::SUCCESS;
         }
 
