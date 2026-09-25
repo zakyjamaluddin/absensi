@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Artisan;
 
 class ManageAbsensis extends ManageRecords
 {
@@ -82,6 +83,25 @@ class ManageAbsensis extends ManageRecords
                         'bulan' => $data['bulan'],
                         'tahun' => $data['tahun'],
                     ]);
+                }),
+
+            // RE-AKTIFKAN TOMBOL PROSES ALPA SECARA DINAMIS
+            Action::make('proses_alpa')
+                ->label('Proses Alpa Hari Ini')
+                ->icon('heroicon-o-user-minus')
+                ->color('danger')
+                ->requiresConfirmation()
+                // TOMBOL HANYA AKAN MUNCUL JIKA METODE DISETEL KE "MANUAL" OLEH ADMIN
+                ->visible(fn () => \App\Models\WaSetting::first()?->tipe_proses_alpa === 'Manual')
+                ->action(function () {
+                    // Panggil perintah artisan secara programmatif dengan opsi --manual murni!
+                    Artisan::call('app:process-daily-alpa', ['--manual' => true]);
+
+                    \Filament\Notifications\Notification::make()
+                        ->title('Proses Alpa Selesai')
+                        ->body("Proses pendeteksian alpa masal dan pengiriman rekap WhatsApp sukses dijalankan!")
+                        ->success()
+                        ->send();
                 }),
         ];
     }

@@ -3,14 +3,15 @@
 namespace App\Filament\Resources\WaSettings;
 
 use App\Filament\Resources\WaSettings\Pages\ManageWaSettings;
-
 use App\Models\WaSetting;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -39,11 +40,34 @@ class WaSettingResource extends Resource
                     ->schema([
                         TextInput::make('token')
                             ->label('API Token Sidobe')
-                            ->password() // Sembunyikan token demi keamanan layar
-                            ->revealable() // Admin bisa klik ikon mata untuk melihat token
+                            ->password()
+                            ->revealable()
                             ->required()
                             ->maxLength(255),
                     ]),
+
+                // SECTIONS BARU KHUSUS UNTUK KONFIGURASI ALPA
+                Section::make('Konfigurasi Laporan Alpa Harian')
+                    ->description('Tentukan bagaimana dan kapan sistem merekam data Alpa dan mengirimkannya ke WhatsApp.')
+                    ->schema([
+                        Select::make('tipe_proses_alpa')
+                            ->label('Metode Proses Alpa')
+                            ->options([
+                                'Otomatis' => 'Otomatis (Jadwal Cron Job)',
+                                'Manual' => 'Manual (Tombol di Rekap Absensi)',
+                            ])
+                            ->required()
+                            ->reactive() // Membuat pilihan di bawahnya dinamis/reaktif
+                            ->default('Otomatis'),
+
+                        TimePicker::make('jam_proses_alpa')
+                            ->label('Jam Eksekusi Otomatis')
+                            ->helperText('Pilih jam berapa sistem akan memproses Alpa secara otomatis setiap hari.')
+                            ->seconds(false)
+                            ->required()
+                            // Input jam hanya muncul jika admin memilih metode "Otomatis"
+                            ->visible(fn (callable $get) => $get('tipe_proses_alpa') === 'Otomatis'),
+                    ])->columns(1),
             ]);
     }
 
