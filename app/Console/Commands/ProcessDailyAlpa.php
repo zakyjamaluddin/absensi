@@ -25,9 +25,16 @@ class ProcessDailyAlpa extends Command
     {
         $today = Carbon::today()->toDateString();
 
-        // 1. Cek libur pekanan (Kecuali jika dipicu MANUAL dari tombol)
-        if (!$this->option('manual') && Carbon::today()->isFriday()) {
-            $this->info('Hari ini adalah hari Jumat. Proses Alpa diabaikan.');
+        // Dapatkan nama hari bahasa Inggris hari ini (misal: 'Friday', 'Sunday', dll.)
+        $currentDayName = Carbon::today()->englishDayOfWeek;
+
+        // Ambil array pilihan ganda dari database (jika kosong, default-kan ke array berisi Friday)
+        $liburPekanan = $settings->libur_pekanan ?? ['Friday'];
+
+        // CEK 1: Apakah hari ini (misal 'Friday') ada di dalam daftar array hari libur pilihan ganda?
+        // (Kecuali jika dipicu secara MANUAL lewat tombol)
+        if (!$this->option('manual') && is_array($liburPekanan) && in_array($currentDayName, $liburPekanan)) {
+            $this->info("Hari ini adalah hari {$currentDayName} (Libur Pekanan). Proses Alpa diabaikan.");
             return Command::SUCCESS;
         }
 

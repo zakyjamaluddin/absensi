@@ -68,8 +68,30 @@ class JamSettingResource extends Resource
                             ->label('Batas Akhir Tap Pulang')
                             ->required()
                             ->seconds(false),
+
+
                     ])->columns(2),
-            ]);
+
+                 Section::make('Libur Mingguan')
+                    ->description('Tentukan hari libur mingguan di Madrasah/Pondok Pesantren.')
+                    ->schema([
+                        Forms\Components\Select::make('libur_pekanan')
+                            ->label('Hari Libur Mingguan')
+                            ->helperText('Pilih satu atau beberapa hari libur pekanan sekolah/pondok.')
+                            ->options([
+                                'Monday'    => 'Hari Senin',
+                                'Tuesday'   => 'Hari Selasa',
+                                'Wednesday' => 'Hari Rabu',
+                                'Thursday'  => 'Hari Kamis',
+                                'Friday'    => 'Hari Jumat',
+                                'Saturday'  => 'Hari Sabtu',
+                                'Sunday'    => 'Hari Ahad / Minggu',
+                            ])
+                            ->multiple() // <--- LOGIKA SAKTI: Mengizinkan pilihan ganda (checkbox/tags)
+                            ->required()
+                            ->default(['Friday']), // Bawaan default berupa array berisi Jumat
+                    ])->columns(1)->columnSpan(2), // Membuat section ini lebih lebar agar nyaman untuk memilih banyak hari
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -86,6 +108,11 @@ class JamSettingResource extends Resource
                     ->time('H:i')
                     ->alignCenter(),
 
+                Tables\Columns\TextColumn::make('batas_terlambat')
+                    ->label('Batas Terlambat')
+                    ->time('H:i')
+                    ->alignCenter(),
+
                 Tables\Columns\TextColumn::make('mulai_pulang')
                     ->label('Mulai Pulang')
                     ->time('H:i')
@@ -95,6 +122,19 @@ class JamSettingResource extends Resource
                     ->label('Batas Akhir Pulang')
                     ->time('H:i')
                     ->alignCenter(),
+
+                Tables\Columns\TextColumn::make('libur_pekanan')
+                    ->label('Libur Mingguan')
+                    ->badge()
+                    ->color('danger')
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
+                        'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu',
+                        'Sunday' => 'Ahad', default => $state,
+                    })
+                    ->placeholder('-')
+                    ->alignCenter(),
+
             ])
             ->filters([
                 //
