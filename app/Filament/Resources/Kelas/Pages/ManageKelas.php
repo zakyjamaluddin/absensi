@@ -13,7 +13,8 @@ class ManageKelas extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
         ];
     }
 }

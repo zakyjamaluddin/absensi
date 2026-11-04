@@ -14,4 +14,9 @@ class JamSetting extends Model
             'libur_pekanan' => 'array', // Otomatis mengubah JSON menjadi Array PHP murni
         ];
     }
+
+    public static function getSetting(): ?self
+    {
+        return static::first();
+    }
 }

@@ -53,6 +53,21 @@ class SiswasRelationManager extends RelationManager
                         return $record->nis ?? 'Belum ada NIS';
                     })
                     ->wrap(),
+                Tables\Columns\TextColumn::make('jam_masuk')
+                    ->label('Jam Masuk')
+                    ->state(function (Siswa $record, $livewire) {
+                        $rawDate = $livewire->getTableFilterState('tanggal_absen')['tanggal'] ?? null;
+                        $selectedDate = $rawDate ? \Carbon\Carbon::parse($rawDate)->toDateString() : now()->toDateString();
+                        $absensi = Absensi::where('tanggal', $selectedDate)
+                            ->where('absensable_type', Siswa::class)
+                            ->where('absensable_id', $record->id)
+                            ->first();
+                        return $absensi?->jam_masuk;
+                    })
+                    ->time('H:i')
+                    ->placeholder('--:--')
+                    ->alignCenter(),
+
                 // KOLOM STATUS ABSENSI HARIAN DINAMIS (Diformat Tanggal Murni)
                 Tables\Columns\TextColumn::make('status_absen')
                     ->label('Status Absensi')
@@ -102,16 +117,48 @@ class SiswasRelationManager extends RelationManager
             ->headerActions([
                 // Memungkinkan admin menambah siswa baru langsung ke dalam kelas ini
                 CreateAction::make()
-                    ->label('Tambah Siswa ke Kelas Ini'),
+                    ->label('Tambah Siswa ke Kelas Ini')
+                    ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                Tables\Actions\Action::make('chat_wa')
+                    ->label('Chat WA')
+                    ->icon('heroicon-o-chat-bubble-left-ellipsis')
+                    ->color('success')
+                    ->tooltip('Kirim pesan WhatsApp ke nomor wali murid')
+                    ->visible(fn (Siswa $record) => !empty($record->nomor_wa_wali))
+                    ->url(function (Siswa $record, $livewire) {
+                        $rawPhone = $record->nomor_wa_wali ?? '';
+                        $phone = preg_replace('/[^0-9]/', '', $rawPhone);
+                        if (str_starts_with($phone, '0')) {
+                            $phone = '62' . substr($phone, 1);
+                        }
+                        $rawDate = $livewire->getTableFilterState('tanggal_absen')['tanggal'] ?? null;
+                        $selectedDate = $rawDate ? \Carbon\Carbon::parse($rawDate)->toDateString() : now()->toDateString();
+                        $absensi = Absensi::where('tanggal', $selectedDate)
+                            ->where('absensable_type', Siswa::class)
+                            ->where('absensable_id', $record->id)
+                            ->first();
+                        $tgl = \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y');
+                        $status = $absensi?->status_masuk ?? 'Belum Absen';
+                        $jam = $absensi?->jam_masuk ? " (Jam Masuk: {$absensi->jam_masuk})" : '';
+
+                        $pesan = "Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali dari *{$record->nama}*.\n\n"
+                            . "Kami dari pihak sekolah menginfokan bahwa ananda pada hari {$tgl} tercatat dengan status presensi: *{$status}*{$jam}.\n\n"
+                            . "Salam hormat,\nWali Kelas";
+
+                        return 'https://api.whatsapp.com/send?phone=' . $phone . '&text=' . rawurlencode($pesan);
+                    }, shouldOpenInNewTab: true),
+
+                EditAction::make()
+                    ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
+                DeleteAction::make()
+                    ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
             ]);
     }
 }

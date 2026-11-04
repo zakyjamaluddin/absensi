@@ -13,9 +13,29 @@ class Dokumentasi extends Page
 
     protected string $view = 'filament.pages.dokumentasi';
 
-    protected static ?string $title = 'Buku Panduan';
+    protected static ?string $title = 'Buku Panduan & Dokumentasi Absaka';
+
+    protected static ?string $navigationLabel = 'Buku Panduan';
 
     // PENGATURAN GRUP NAVIGASI (Sejajar dengan Users, Roles, dsb.)
-    protected static string | UnitEnum | null $navigationGroup = 'Manajemen Sistem';
-    protected static ?int $navigationSort = 4; // Berada di paling bawah
+    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan & Sistem';
+    protected static ?int $navigationSort = 5; // Berada di paling bawah
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        if ($user->hasAnyRole(['staff_absensi', 'staff_perpustakaan'])) {
+            return false;
+        }
+
+        return $user->hasAnyRole(['admin_absensi', 'admin_perpustakaan']) || $user->can('View:Dokumentasi');
+    }
 }

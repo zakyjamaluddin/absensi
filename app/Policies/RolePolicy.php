@@ -11,6 +11,15 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class RolePolicy
 {
     use HandlesAuthorization;
+
+    public function before(AuthUser $authUser, string $ability): ?bool
+    {
+        if ($authUser->hasRole('super_admin')) {
+            return true;
+        }
+
+        return null;
+    }
     
     public function viewAny(AuthUser $authUser): bool
     {

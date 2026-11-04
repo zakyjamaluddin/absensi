@@ -41,6 +41,9 @@ class SiswaImporter extends Importer
                     // Jika cocok, masukkan ID kelas ke dalam rekor Siswa
                     $record->kelas_id = $kelas->id;
                 }),
+            ImportColumn::make('nomor_wa_wali')
+                ->label('No. WA Wali')
+                ->rules(['nullable', 'max:25']),
         ];
     }
 

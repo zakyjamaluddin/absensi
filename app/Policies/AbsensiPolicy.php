@@ -11,6 +11,15 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class AbsensiPolicy
 {
     use HandlesAuthorization;
+
+    public function before(AuthUser $authUser, string $ability): ?bool
+    {
+        if ($authUser->hasRole('super_admin')) {
+            return true;
+        }
+
+        return null;
+    }
     
     public function viewAny(AuthUser $authUser): bool
     {
@@ -24,16 +33,28 @@ class AbsensiPolicy
 
     public function create(AuthUser $authUser): bool
     {
+        if ($authUser->hasAnyRole(['guru', 'wali_kelas', 'Wali Kelas', 'siswa'])) {
+            return false;
+        }
+
         return $authUser->can('Create:Absensi');
     }
 
     public function update(AuthUser $authUser, Absensi $absensi): bool
     {
+        if ($authUser->hasAnyRole(['guru', 'wali_kelas', 'Wali Kelas', 'siswa'])) {
+            return false;
+        }
+
         return $authUser->can('Update:Absensi');
     }
 
     public function delete(AuthUser $authUser, Absensi $absensi): bool
     {
+        if ($authUser->hasAnyRole(['guru', 'wali_kelas', 'Wali Kelas', 'siswa'])) {
+            return false;
+        }
+
         return $authUser->can('Delete:Absensi');
     }
 

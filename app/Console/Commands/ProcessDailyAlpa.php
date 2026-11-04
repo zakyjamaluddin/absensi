@@ -9,6 +9,7 @@ use App\Models\HariLibur;
 use App\Models\User;
 
 use App\Models\Guru;
+use App\Models\JamSetting;
 use App\Models\WaSetting; // <--- Import WaSetting
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Cache;
@@ -24,12 +25,13 @@ class ProcessDailyAlpa extends Command
     public function handle(): int
     {
         $today = Carbon::today()->toDateString();
+        $jamSetting = JamSetting::first();
 
         // Dapatkan nama hari bahasa Inggris hari ini (misal: 'Friday', 'Sunday', dll.)
         $currentDayName = Carbon::today()->englishDayOfWeek;
 
         // Ambil array pilihan ganda dari database (jika kosong, default-kan ke array berisi Friday)
-        $liburPekanan = $settings->libur_pekanan ?? ['Friday'];
+        $liburPekanan = $jamSetting->libur_pekanan ?? ['Friday'];
 
         // CEK 1: Apakah hari ini (misal 'Friday') ada di dalam daftar array hari libur pilihan ganda?
         // (Kecuali jika dipicu secara MANUAL lewat tombol)
@@ -59,11 +61,13 @@ class ProcessDailyAlpa extends Command
                 return Command::SUCCESS;
             }
 
-            // GERBANG 2: Cek apakah waktu sekarang sudah melewati jam proses alpa kustom
+            // GERBANG 2: Cek apakah waktu sekarang sudah melewati waktu akhir absensi yang diset di database
             $now = Carbon::now();
             $timeNow = $now->toTimeString();
-            if ($timeNow < $waSettings->jam_proses_alpa) {
-                $this->info("Belum waktunya memproses Alpa. Jendela otomatis dijadwalkan pukul {$waSettings->jam_proses_alpa}.");
+            $batasAkhir = $waSettings->jam_proses_alpa ?: ($jamSetting?->selesai_masuk ?? '08:00:00');
+
+            if ($timeNow < $batasAkhir) {
+                $this->info("Belum waktunya memproses Alpa. Batas waktu akhir absensi masuk dijadwalkan pukul {$batasAkhir}.");
                 return Command::SUCCESS;
             }
 
@@ -75,21 +79,84 @@ class ProcessDailyAlpa extends Command
             }
         }
 
-        // 4. Jalankan Proses Alpa Utama
+        // 4. Jalankan Proses Alpa Utama (Siswa)
         $siswaBelumAbsen = Siswa::whereDoesntHave('absensis', function ($query) use ($today) {
-            $query->where('tanggal', $today);
+            $query->where('tanggal', $today)->where('status_masuk', '!=', 'Belum Absen');
         })->get();
 
+        $batasAkhirNotif = $waSettings->jam_proses_alpa ?: ($jamSetting?->selesai_masuk ?? '08:00:00');
         $count = 0;
+        $waWaliCount = 0;
+
         foreach ($siswaBelumAbsen as $siswa) {
-            Absensi::create([
-                'tanggal'         => $today,
-                'absensable_type' => Siswa::class,
-                'absensable_id'   => $siswa->id,
-                'jam_masuk'       => null,
-                'status_masuk'    => 'Alpa',
-            ]);
+            Absensi::updateOrCreate(
+                [
+                    'tanggal'         => $today,
+                    'absensable_type' => Siswa::class,
+                    'absensable_id'   => $siswa->id,
+                ],
+                [
+                    'jam_masuk'       => null,
+                    'status_masuk'    => 'Alpa',
+                ]
+            );
             $count++;
+
+            // KIRIM NOTIFIKASI WA KE WALI MURID JIKA FITUR AKTIF
+            if ($waSettings->notif_wa_wali_alpa && $siswa->is_notif_wa_aktif && !empty($siswa->nomor_wa_wali)) {
+                $res = WhatsAppService::sendNotifAlpaWali($siswa, $today, $batasAkhirNotif);
+                if ($res['success']) {
+                    $waWaliCount++;
+                }
+            }
+        }
+
+        // 5. Jalankan Proses Alpa untuk Guru
+        $hariIndo = Guru::getHariMapping()[$currentDayName] ?? 'Senin';
+        $modeGuru = $jamSetting?->mode_absensi_guru ?? 'statis';
+
+        if ($modeGuru === 'jadwal') {
+            // Mode dinamis: Hanya guru yang memiliki jadwal mengajar pada hari ini yang wajib hadir
+            $gurusBelumAbsen = Guru::whereHas('jadwalMengajars', function ($q) use ($hariIndo) {
+                $q->where('hari', $hariIndo);
+            })->whereDoesntHave('absensis', function ($query) use ($today) {
+                $query->where('tanggal', $today)->where('status_masuk', '!=', 'Belum Absen');
+            })->get();
+        } else {
+            // Mode statis: Semua guru wajib hadir pada hari aktif sekolah
+            $gurusBelumAbsen = Guru::whereDoesntHave('absensis', function ($query) use ($today) {
+                $query->where('tanggal', $today)->where('status_masuk', '!=', 'Belum Absen');
+            })->get();
+        }
+
+        $guruAlpaCount = 0;
+        $guruAlpaList = [];
+
+        foreach ($gurusBelumAbsen as $guru) {
+            Absensi::updateOrCreate(
+                [
+                    'tanggal'         => $today,
+                    'absensable_type' => Guru::class,
+                    'absensable_id'   => $guru->id,
+                ],
+                [
+                    'jam_masuk'       => null,
+                    'status_masuk'    => 'Alpa',
+                ]
+            );
+            $guruAlpaCount++;
+
+            $jadwalStr = '';
+            if ($modeGuru === 'jadwal') {
+                $jadwalHariIni = $guru->getJadwalHariIni($today);
+                $jadwalStr = $jadwalHariIni->map(fn ($j) => "Jam ke-{$j->jam_ke} ({$j->mata_pelajaran})")->implode(', ');
+            }
+
+            $guruAlpaList[] = [
+                'nama' => $guru->nama,
+                'nip' => $guru->nip,
+                'jadwal' => $jadwalStr,
+            ];
         }
 
         // Jika jalan otomatis, kunci status hari ini di cache
@@ -97,9 +164,10 @@ class ProcessDailyAlpa extends Command
             Cache::forever('alpa_processed_' . $today, true);
         }
 
-        $this->info("Sukses mencatat {$count} siswa sebagai Alpa hari ini.");
+        $this->info("Sukses mencatat {$count} siswa sebagai Alpa hari ini. ({$waWaliCount} notifikasi WA terkirim ke wali murid).");
+        $this->info("Sukses mencatat {$guruAlpaCount} guru sebagai Alpa hari ini (Mode Absensi Guru: {$modeGuru}).");
 
-        // 5. Susun & Kirim Laporan WhatsApp
+        // 6. Susun & Kirim Laporan WhatsApp Siswa ke Admin
         if ($count > 0) {
             $alpaRecords = Absensi::where('tanggal', $today)
                 ->where('status_masuk', 'Alpa')
@@ -146,7 +214,17 @@ class ProcessDailyAlpa extends Command
                 }
             }
 
-            $this->info("Laporan WhatsApp berhasil dikirim ke {$waCount} nomor Guru Admin.");
+            $this->info("Laporan WhatsApp siswa berhasil dikirim ke {$waCount} nomor Guru Admin.");
+        }
+
+        // 7. Susun & Kirim Laporan WhatsApp Guru Alpa ke Admin
+        if ($guruAlpaCount > 0) {
+            if ($waSettings->report_guru_alpa) {
+                $reportRes = WhatsAppService::sendReportGuruAlpa($guruAlpaList, $today);
+                $this->info($reportRes['message'] ?? 'Laporan Guru Alpa diproses.');
+            } else {
+                $this->info('Fitur auto report Guru Alpa dinonaktifkan di pengaturan WA.');
+            }
         }
 
         return Command::SUCCESS;

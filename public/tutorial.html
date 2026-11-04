@@ -1,0 +1,840 @@
+﻿<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Instalasi & Penggunaan Aplikasi Absaka - MA Islamiyah Balen</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="public/logo.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 0.75rem;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Glow Ornament -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-32 bg-gradient-to-r from-emerald-500/10 via-brand-500/15 to-teal-500/10 blur-3xl pointer-events-none -z-10"></div>
+
+    <!-- Navigation Header -->
+    <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-700 flex items-center justify-center text-white font-extrabold shadow-sm shadow-brand-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg font-black tracking-tight text-slate-900">ABSAKA</span>
+                        <span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-brand-50 text-brand-700 border border-brand-200/80">MA Islamiyah Balen</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium">Buku Panduan Teknis & Manual Instalasi Hosting</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="#quickstart" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-brand-700 hover:bg-slate-100 transition">
+                    Alur Setup Cepat
+                </a>
+                <a href="#login-credentials" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-brand-700 hover:bg-slate-100 transition">
+                    Daftar Akun
+                </a>
+                <a href="https://absensi.maisba.sch.id" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm shadow-brand-600/20 transition">
+                    <span>Buka Sistem</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full space-y-10">
+
+        <!-- Hero Card -->
+        <section class="glass-card rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200/80 relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-100/60 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="max-w-3xl space-y-4 relative z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                    Dokumen Resmi Klien • absensi.maisba.sch.id
+                </div>
+                <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                    Panduan Lengkap Instalasi Hosting & Penyiapan Awal <span class="text-brand-600">Aplikasi Absaka</span>
+                </h1>
+                <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                    Selamat datang di panduan resmi implementasi <strong>Sistem Presensi RFID/QR & Perpustakaan Digital Terintegrasi</strong> untuk <strong>MA Islamiyah Balen</strong>. Ikuti langkah-langkah di bawah ini untuk mengunggah aplikasi ke hosting, menghubungkan basis data, dan memulai operasional harian sekolah.
+                </p>
+
+                <!-- Quick Download Bar -->
+                <div class="pt-4 grid sm:grid-cols-2 gap-3.5">
+                    <!-- Zip Download -->
+                    <a href="https://drive.google.com/file/d/175CyDMZxehcRfGU4jtzsw0FJz5ssnqWe/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-200 hover:border-brand-500 hover:shadow-md transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold group-hover:bg-brand-600 group-hover:text-white transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Berkas Sumber</p>
+                                <p class="text-sm font-bold text-slate-900 group-hover:text-brand-600 transition">Unduh Source Code (.zip)</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg">Google Drive &rarr;</span>
+                    </a>
+
+                    <!-- SQL Download -->
+                    <a href="https://drive.google.com/file/d/1SOQAP-ap5ZHIAlY-7MQMXRaeiNZFuGba/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold group-hover:bg-blue-600 group-hover:text-white transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7zm0 5h16M9 4v16"/>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Basis Data Starter</p>
+                                <p class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition">Unduh Database MySQL (.sql)</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">Google Drive &rarr;</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Table of Contents Sticky Bar -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600">
+                <span class="text-slate-400 font-bold uppercase tracking-wider mr-1">Lompat Ke:</span>
+                <a href="#langkah-1" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-brand-50 hover:text-brand-700 transition">1. Upload & Unzip Hosting</a>
+                <a href="#langkah-2" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-brand-50 hover:text-brand-700 transition">2. Setup Database & .env</a>
+                <a href="#login-credentials" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-brand-50 hover:text-brand-700 transition">3. Akun Login & Google Auth</a>
+                <a href="#quickstart" class="px-3 py-1 rounded-full bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 transition">4. Setup Cepat Absensi & Perpus</a>
+            </div>
+        </section>
+
+        <!-- BAGIAN 1: PANDUAN INSTALASI HOSTING -->
+        <div class="space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">1</div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Instalasi Berkas & Domain di Hosting</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Mempersiapkan subdomain dan mengekstrak berkas aplikasi di File Manager cPanel / DirectAdmin</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Step 1.1 -->
+                <div id="langkah-1" class="glass-card rounded-2xl p-6 border border-slate-200/80 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-extrabold text-sm">
+                        1.1
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Buat Subdomain Khusus</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Masuk ke panel hosting (cPanel), buka menu <strong>Domains / Subdomains</strong>, lalu tambahkan domain berikut:
+                    </p>
+                    <div class="p-3 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-between">
+                        <span class="text-xs font-mono font-bold text-brand-700 select-all">absensi.maisba.sch.id</span>
+                        <button onclick="copyToClipboard('absensi.maisba.sch.id', this)" class="text-xs text-slate-500 hover:text-brand-600 p-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        </button>
+                    </div>
+                    <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs leading-relaxed space-y-1">
+                        <p class="font-bold flex items-center gap-1.5 text-emerald-800">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            PRAKTIS: Sudah Dilengkapi .htaccess Otomatis
+                        </p>
+                        <p>Klien <strong>tidak perlu repot mengubah Document Root ke /public</strong>! Cukup ekstrak di root subdomain (contoh: <code class="font-bold bg-emerald-100/80 px-1 rounded text-emerald-900">/public_html/absensi</code>), berkas <code class="font-bold font-mono">.htaccess</code> bawaan kami akan langsung mengarahkan seluruh pengunjung ke sistem secara otomatis dan aman (file <code class="font-mono">.env</code> otomatis terproteksi dari akses luar).</p>
+                    </div>
+                </div>
+
+                <!-- Step 1.2 -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-200/80 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-extrabold text-sm">
+                        1.2
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Upload & Ekstrak .ZIP</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Buka <strong>File Manager</strong> hosting, masuk ke direktori tempat subdomain berada, lalu upload file zip yang telah Anda unduh dari Google Drive.
+                    </p>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
+                        <li>Klik kanan file zip &rarr; pilih <strong>Extract</strong>.</li>
+                        <li>Pastikan seluruh folder seperti <code class="bg-slate-100 px-1 rounded">app</code>, <code class="bg-slate-100 px-1 rounded">bootstrap</code>, <code class="bg-slate-100 px-1 rounded">public</code> berada di root subdomain.</li>
+                        <li>Setelah selesai ekstrak, file .zip boleh dihapus untuk menghemat ruang disk hosting.</li>
+                    </ul>
+                </div>
+
+                <!-- Step 1.3 -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-200/80 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-extrabold text-sm">
+                        1.3
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Izin Folder (Permissions)</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Pastikan sistem web server dapat menulis log dan cache di folder storage:
+                    </p>
+                    <div class="space-y-1.5 text-xs font-mono">
+                        <div class="p-2 rounded-lg bg-slate-100 border border-slate-200 flex justify-between items-center">
+                            <span>storage/ &rarr; Permission: <strong>775 / 755</strong></span>
+                            <span class="text-emerald-600 font-bold">Writable</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-100 border border-slate-200 flex justify-between items-center">
+                            <span>bootstrap/cache/ &rarr; <strong>775 / 755</strong></span>
+                            <span class="text-emerald-600 font-bold">Writable</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500">Gunakan PHP versi <strong>8.2</strong> atau <strong>8.3</strong> di cPanel (MultiPHP Manager) dengan ekstensi pdo, intl, bcmath, fileinfo, gd aktif.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BAGIAN 2: PANDUAN DATABASE & .ENV -->
+        <div id="langkah-2" class="space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">2</div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Setup Database MySQL & Sinkronisasi .env</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Membuat basis data di hosting, mengimpor starter SQL, dan menghubungkan kredensial di file konfigurasi</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Database creation & import -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-200/80 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">2.1</span>
+                            Pembuatan Database & Import SQL
+                        </h3>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold border border-blue-200">phpMyAdmin</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <p><strong>1. Buat Database & Pengguna:</strong> Masuk ke cPanel &rarr; <em>MySQL® Databases</em>. Buat nama basis data, nama pengguna (user), dan kata sandi baru. Penamaan dan kata sandi <strong>bebas</strong> sesuai keinginan Anda.</p>
+                        
+                        <p><strong>2. Hubungkan User ke Database:</strong> Pada bagian <em>Add User to Database</em>, pilih user dan database yang dibuat tadi, lalu klik Add dan centang opsi <strong class="text-slate-900">ALL PRIVILEGES</strong>.</p>
+                        
+                        <p><strong>3. Import File SQL:</strong></p>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-600 text-xs">
+                            <li>Buka menu <strong>phpMyAdmin</strong> dari cPanel.</li>
+                            <li>Pilih database yang baru saja Anda buat di panel sebelah kiri.</li>
+                            <li>Buka tab <strong>Import</strong> di bagian atas.</li>
+                            <li>Pilih file SQL yang sudah diunduh (<a href="https://drive.google.com/file/d/1SOQAP-ap5ZHIAlY-7MQMXRaeiNZFuGba/view?usp=sharing" target="_blank" class="text-brand-600 font-bold underline">Unduh dari Google Drive di sini</a>).</li>
+                            <li>Klik tombol <strong>Go / Kirim</strong> di bagian bawah.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs leading-relaxed flex items-start gap-2.5">
+                        <svg class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p>
+                            <strong>Kelebihan Starter SQL Ini:</strong> Klien tidak perlu menjalankan <code class="font-mono bg-emerald-100 px-1 rounded">php artisan db:seed</code> di hosting. File SQL ini sudah memuat skema tabel, 8 peran lengkap, 50 hari libur nasional 2026–2027, serta akun default langsung aktif!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- .env configuration -->
+                <div class="glass-card rounded-2xl p-6 border border-slate-200/80 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">2.2</span>
+                            Penyesuaian File .env
+                        </h3>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">Konfigurasi</span>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Di cPanel File Manager, aktifkan opsi <em>Show Hidden Files (dotfiles)</em>. Buka dan edit file <code class="font-bold text-slate-900">.env</code> di root aplikasi, lalu sesuaikan bagian berikut:
+                    </p>
+
+                    <div class="code-block p-4 text-xs font-mono space-y-1 relative">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-700 text-slate-400">
+                            <span>.env configuration snippet</span>
+                            <button onclick="copySnippet(this)" class="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-slate-300">Salin</button>
+                        </div>
+                        <div class="text-emerald-400">APP_NAME="Absaka"</div>
+                        <div class="text-emerald-400">APP_ENV=production</div>
+                        <div class="text-emerald-400">APP_DEBUG=false</div>
+                        <div class="text-brand-300 font-bold">APP_URL=https://absensi.maisba.sch.id</div>
+                        <div class="text-slate-500 pt-2"># Sesuaikan dengan Database yang dibuat di cPanel:</div>
+                        <div class="text-sky-300">DB_CONNECTION=mysql</div>
+                        <div class="text-sky-300">DB_HOST=127.0.0.1</div>
+                        <div class="text-sky-300">DB_PORT=3306</div>
+                        <div class="text-yellow-300 font-bold">DB_DATABASE=nama_database_anda</div>
+                        <div class="text-yellow-300 font-bold">DB_USERNAME=nama_user_db_anda</div>
+                        <div class="text-yellow-300 font-bold">DB_PASSWORD=kata_sandi_db_anda</div>
+                    </div>
+
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Simpan perubahan file <code class="font-semibold text-slate-700">.env</code>. Setelah tersimpan, aplikasi telah terhubung secara sempurna dan siap untuk diakses!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BAGIAN 3: DAFTAR AKUN DEFAULT & LOGIN GOOGLE -->
+        <div id="login-credentials" class="space-y-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">3</div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Panduan Login & Hak Akses Pengguna</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Informasi akun bawaan untuk pengujian dan sistem registrasi mandiri guru & siswa via Akun Google</p>
+                </div>
+            </div>
+
+            <!-- Login Credentials Table -->
+            <div class="glass-card rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs">
+                <div class="p-4 sm:p-6 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Daftar Akun Default Resmi (@maisba.sch.id)</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Semua akun di bawah menggunakan kata sandi bawaan: <code class="font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">password</code></p>
+                    </div>
+                    <a href="https://absensi.maisba.sch.id/admin/login" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 transition self-start sm:self-auto">
+                        <span>Halaman Login</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px] tracking-wider">
+                                <th class="py-3 px-4 sm:px-6">Peran (Role)</th>
+                                <th class="py-3 px-4 sm:px-6">Email Login</th>
+                                <th class="py-3 px-4 sm:px-6">Password</th>
+                                <th class="py-3 px-4 sm:px-6">Wewenang / Menu Utama</th>
+                                <th class="py-3 px-4 sm:px-6 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    Super Administrator
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">admin@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Akses penuh ke semua modul, master data, pengaturan sistem, dan laporan</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('admin@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    Admin Absensi
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">admin.absensi@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Kelola master siswa, guru, kelas, jadwal piket, jam absen, dan integrasi WA</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('admin.absensi@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                                    Staff Absensi
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">staff.absensi@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Akses Scanner Absensi (gerbang masuk/pulang) & Dashboard kehadiran</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('staff.absensi@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    Admin Perpustakaan
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">admin.perpus@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Kelola katalog buku, sirkulasi pinjam-kembali, denda, dan aturan literasi</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('admin.perpus@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                                    Staff Perpustakaan
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">staff.perpus@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Akses Scanner Pengunjung Perpus & Dashboard perpustakaan</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('staff.perpus@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    Guru (Demo)
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">guru@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Dashboard pribadi, rekap absensi guru sendiri, dan menu Ajukan Izin / Sakit</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('guru@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                    Wali Kelas (Demo)
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">walikelas@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Menu eksklusif "Presensi Kelas Saya" (pantau siswa hadir/telat/alpa hari ini, tombol Chat WA Wali, ekspor bulanan), serta ajukan izin mandiri</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('walikelas@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 sm:px-6 font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    Siswa (Demo)
+                                </td>
+                                <td class="py-3 px-4 sm:px-6 font-mono font-medium text-brand-700">siswa@maisba.sch.id</td>
+                                <td class="py-3 px-4 sm:px-6 font-mono text-slate-500">password</td>
+                                <td class="py-3 px-4 sm:px-6 text-xs text-slate-600">Melihat rekap kehadiran mandiri, ajukan izin sakit, melihat ranking kedisiplinan</td>
+                                <td class="py-3 px-4 sm:px-6 text-center">
+                                    <button onclick="copyToClipboard('siswa@maisba.sch.id', this)" class="px-2 py-1 rounded bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-xs font-semibold transition">Salin</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sign in with Google Feature Highlight -->
+            <div class="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-brand-500/5 to-teal-500/10 border border-brand-200/80 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white shadow-xs border border-slate-200 flex items-center justify-center">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Registrasi Mandiri Guru & Siswa via "Sign in with Google"</h3>
+                        <p class="text-xs text-slate-600">Admin tidak perlu membuat akun pengguna satu per satu untuk ratusan siswa dan dewan guru!</p>
+                    </div>
+                </div>
+
+                <div class="grid sm:grid-cols-3 gap-3 text-xs text-slate-700">
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1">
+                        <span class="font-bold text-brand-700">1. Klik Masuk Google</span>
+                        <p class="text-slate-500">Guru atau siswa membuka halaman login dan mengklik tombol <em>Sign in with Google</em> menggunakan akun Gmail mereka.</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1">
+                        <span class="font-bold text-brand-700">2. Verifikasi NIP / NIS</span>
+                        <p class="text-slate-500">Saat pertama kali mendaftar, sistem meminta nomor identitas. Jika NIP terdeteksi, akun otomatis diberi peran <strong>Guru</strong>; jika NIS terdeteksi, otomatis diberi peran <strong>Siswa</strong>.</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1">
+                        <span class="font-bold text-brand-700">3. Sekali Klik Seterusnya</span>
+                        <p class="text-slate-500">Untuk login di kemudian hari, guru & siswa cukup mengklik tombol Google satu kali tanpa perlu memasukkan NIP/NIS lagi.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BAGIAN 4: PANDUAN CEPAT SETUP APLIKASI (QUICKSTART) -->
+        <div id="quickstart" class="space-y-8">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">4</div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Panduan Cepat Operasional (Quickstart)</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Langkah sistematis penyiapan data awal sistem Presensi dan Perpustakaan agar siap dipakai</p>
+                </div>
+            </div>
+
+            <!-- Prerequisites Card -->
+            <div class="p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-950 space-y-3">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-amber-900">
+                    <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Prasyarat Awal Sebelum Memulai:
+                </h3>
+                <div class="grid sm:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-white/80 p-3 rounded-xl border border-amber-200">
+                        <p class="font-bold text-slate-900 mb-1">&check; Login Akun Tepat</p>
+                        <p class="text-slate-600">Pastikan Anda telah masuk sebagai <strong>Super Administrator</strong> atau <strong>Admin Absensi</strong> untuk mengatur modul ini.</p>
+                    </div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-amber-200">
+                        <p class="font-bold text-slate-900 mb-1">&check; Pasang PWA di Perangkat</p>
+                        <p class="text-slate-600">Klik tombol <strong>"Install Aplikasi"</strong> di bagian bawah bilah samping (sidebar) pada laptop/HP agar berjalan seperti aplikasi native.</p>
+                    </div>
+                    <div class="bg-white/80 p-3 rounded-xl border border-amber-200">
+                        <p class="font-bold text-slate-900 mb-1">&check; Aktifkan Notifikasi Cerdas</p>
+                        <p class="text-slate-600">Klik tombol <strong>"Aktifkan Notifikasi"</strong> di sidebar dan izinkan peramban (Allow Notification) untuk menerima alarm presensi H-5 menit.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4.1 Langkah Penyiapan Modul Presensi -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-brand-100 text-brand-800 flex items-center justify-center text-xs font-black">A</span>
+                        Alur Penyiapan Sistem Presensi & WhatsApp
+                    </h3>
+                    <span class="text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-200">Modul Utama</span>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Step 1 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 1</span>
+                            <span class="text-[11px] text-slate-400">Master Data</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Input Data Guru</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Data Guru</strong> &rarr; Tambah Guru. Masukkan NIP, Nama Lengkap, dan <strong>Nomor WhatsApp</strong> aktif (format 08xxx atau 62xxx) agar guru menerima rekap absensi.
+                        </p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 2</span>
+                            <span class="text-[11px] text-slate-400">Master Data</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Input Data Kelas & Wali Kelas</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Data Kelas</strong> &rarr; Tambah Kelas. Beri nama kelas (contoh: <em>X TKJ 1, XI RPL 2</em>) dan pilih guru pembina sebagai <strong>Wali Kelas</strong> yang berhak mengekspor laporan bulanan.
+                        </p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 3</span>
+                            <span class="text-[11px] text-slate-400">Master Siswa</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Input Siswa & Kartu RFID</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Data Siswa</strong> &rarr; Tambah Siswa. Masukkan NIS, Nama, Kelas, Nomor WA Wali Murid, dan <strong>tap kartu RFID</strong> pada kolom kartu (atau isi kode unik kartu).
+                        </p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 4</span>
+                            <span class="text-[11px] text-slate-400">Identitas Kartu</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Unduh & Cetak QR Code Siswa</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Pada tabel Siswa, klik tombol <strong>Unduh QR Code</strong>. Barcode QR ini dapat dicetak pada kartu identitas pelajar sebagai alternatif scan kamera apabila belum memakai kartu RFID tap.
+                        </p>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-brand-100 text-brand-800">Langkah 5</span>
+                            <span class="text-[11px] text-brand-600 font-bold">Integrasi WA</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Integrasi API Sidobe WhatsApp</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Integrasi WA</strong> &rarr; masukkan <strong>Token API Sidobe</strong>. Pilih metode proses alpa (<em>Otomatis</em> atau <em>Manual</em>) dan aktifkan notifikasi kehadiran ke orang tua/wali murid.
+                        </p>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 6</span>
+                            <span class="text-[11px] text-slate-400">Aturan Jam</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Atur Jam Absensi Siswa & Guru</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Pengaturan Jam</strong>. Tentukan:
+                            <br>&bull; Mulai Masuk (contoh: 06:00)
+                            <br>&bull; Batas Tepat Waktu (contoh: 07:00)
+                            <br>&bull; Batas Akhir Masuk & Jam Mulai Pulang.
+                        </p>
+                    </div>
+
+                    <!-- Step 7 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 7</span>
+                            <span class="text-[11px] text-slate-400">Jadwal Harian</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Atur Jadwal Guru Piket</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Jadwal Guru Piket</strong>. Masukkan guru piket harian (Senin s/d Sabtu). Pada hari bertugas, guru piket otomatis menerima notifikasi push permohonan izin baru dan mendapatkan akses ke menu <strong>Pengajuan Izin Masuk</strong> untuk menyetujui (approve) atau menolak izin/sakit siswa & guru (guru yang tidak piket hanya memiliki menu mandiri <strong>Ajukan Izin</strong>).
+                        </p>
+                    </div>
+
+                    <!-- Step 8 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-slate-100 text-slate-700">Langkah 8</span>
+                            <span class="text-[11px] text-slate-400">Kalender SKB</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Sinkronkan Libur Nasional</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Hari Libur</strong> &rarr; klik tombol <em>"Sinkronkan Libur Nasional"</em> untuk memperbarui kalender libur otomatis (sistem otomatis mengirim pengingat notifikasi H-3 sebelum libur).
+                        </p>
+                    </div>
+
+                    <!-- Step 9 -->
+                    <div class="glass-card rounded-2xl p-4 border border-brand-300 bg-brand-50/30 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-brand-600 text-white">Langkah 9</span>
+                            <span class="text-[11px] text-brand-700 font-bold">Siap Tap!</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Jalankan Scanner Absensi</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Scanner Absensi</strong> di komputer pos gerbang sekolah. Hubungkan alat scan RFID USB atau gunakan webcam/kamera HP. Siswa dan guru langsung tap untuk presensi real-time!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4.2 Langkah Penyiapan Modul Perpustakaan -->
+            <div class="space-y-4 pt-4">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">B</span>
+                        Alur Penyiapan Sistem Perpustakaan Digital & Literasi
+                    </h3>
+                    <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">Modul Literasi</span>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Perpus Step 1 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700">Langkah 1</span>
+                            <span class="text-[11px] text-slate-400">Aturan Sirkulasi</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Atur Pengaturan Perpustakaan</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Pengaturan Perpustakaan</strong>. Atur durasi pinjam default (misal: <em>7 hari</em>), serta poin reward untuk kunjungan membaca dan poin peminjaman buku.
+                        </p>
+                    </div>
+
+                    <!-- Perpus Step 2 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700">Langkah 2</span>
+                            <span class="text-[11px] text-slate-400">Katalog Pustaka</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Input Master Data Buku</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Data Buku</strong> &rarr; Tambah Buku. Masukkan Judul Buku, Penulis, Penerbit, Nomor ISBN / Kode Barcode, Kategori Rak, dan Jumlah Eksemplar (Stok Buku).
+                        </p>
+                    </div>
+
+                    <!-- Perpus Step 3 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700">Langkah 3</span>
+                            <span class="text-[11px] text-slate-400">Meja Pengunjung</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Siapkan Scanner Perpustakaan</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Scanner Perpustakaan</strong> di meja sirkulasi. Siswa yang masuk cukup men-tap kartu RFID / memindai QR code mereka; sistem mencatat riwayat kunjungan dan memberi poin literasi secara otomatis!
+                        </p>
+                    </div>
+
+                    <!-- Perpus Step 4 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700">Langkah 4</span>
+                            <span class="text-[11px] text-slate-400">Sirkulasi</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Peminjaman & Pengembalian</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Peminjaman Buku</strong> untuk mencatat buku yang dipinjam siswa. Sistem menghitung tanggal jatuh tempo dan mengirim notifikasi saat buku harus dikembalikan.
+                        </p>
+                    </div>
+
+                    <!-- Perpus Step 5 -->
+                    <div class="glass-card rounded-2xl p-4 border border-slate-200 space-y-2 sm:col-span-2 lg:col-span-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-50 text-indigo-700">Langkah 5</span>
+                            <span class="text-[11px] text-indigo-600 font-bold">Gamifikasi & Apresiasi</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900">Pantau Rating Minat Literasi</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Buka menu <strong>Rating Minat Literasi</strong> untuk melihat visualisasi podium bertingkat 3 siswa teratas dengan poin literasi tertinggi di sekolah. Gunakan data ini untuk memberi piagam/apresiasi berkala pada siswa berprestasi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TROUBLESHOOTING CARD -->
+        <div class="glass-card rounded-3xl p-6 sm:p-8 border border-amber-200/90 bg-gradient-to-br from-amber-50/50 via-white to-amber-50/20 space-y-4 shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">
+                    ⚠️
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900">Solusi Masalah: Foto Siswa Tidak Tampil (Error 403 Forbidden di Hosting)</h3>
+                    <p class="text-xs text-slate-500">Panduan perbaikan cepat jika foto siswa atau gambar profil mengalami kendala izin akses di shared hosting</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <p>
+                    <strong>Penyebab:</strong> Proyek di-zip di sistem operasi Windows, di mana shortcut <code class="font-mono bg-amber-100/70 px-1 rounded text-amber-900">public/storage</code> mengarah ke path Windows. Ketika diekstrak di server Linux cPanel, shortcut tersebut menjadi rusak (*broken link*), sehingga Apache memblokir aksesnya dengan pesan <em>403 Forbidden</em>.
+                </p>
+
+                <div class="grid sm:grid-cols-2 gap-3.5 pt-1">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold bg-brand-50 text-brand-700 border border-brand-200">
+                            Solusi 1: Pemulihan Sekali Klik (Rekomendasi)
+                        </span>
+                        <p class="text-xs text-slate-600">
+                            Cukup buka tautan perbaikan otomatis di browser Anda (tanpa perlu repot membuka terminal/SSH):
+                        </p>
+                        <div class="p-2.5 rounded-xl bg-slate-100 font-mono text-xs font-bold text-brand-700 flex items-center justify-between">
+                            <span class="select-all">https://absensi.maisba.sch.id/fix-storage</span>
+                            <button onclick="copyToClipboard('https://absensi.maisba.sch.id/fix-storage', this)" class="text-xs text-slate-500 hover:text-brand-600">Salin</button>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Sistem akan otomatis menghapus symlink lama dan membuat symlink Linux yang valid.</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                            Solusi 2: Jika Hosting Mematikan Symlink
+                        </span>
+                        <p class="text-xs text-slate-600">
+                            Jika paket hosting Anda tidak mengizinkan fungsi symlink:
+                        </p>
+                        <ol class="list-decimal pl-4 text-xs text-slate-600 space-y-1">
+                            <li>Buka <strong>cPanel &rarr; File Manager</strong>.</li>
+                            <li>Buka folder <strong>public</strong> lalu <strong>Hapus (Delete)</strong> file/shortcut bernama <code class="bg-slate-100 px-1 rounded font-bold">storage</code>.</li>
+                            <li>Selesai! Fitur <em>Fallback Route</em> aplikasi kami akan otomatis mengambil dan menyajikan foto siswa langsung via PHP tanpa perlu symlink.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Callout Help Box -->
+        <div class="p-6 rounded-3xl bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+            <div class="space-y-1">
+                <h3 class="text-base font-bold text-emerald-400">Memerlukan Bantuan Lanjutan?</h3>
+                <p class="text-xs text-slate-400">Seluruh panduan modul detail dapat diakses langsung di dalam menu <strong>Dokumentasi</strong> pada panel admin aplikasi.</p>
+            </div>
+            <a href="https://absensi.maisba.sch.id/admin/dokumentasi" target="_blank" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-500 hover:bg-brand-600 text-white transition self-start sm:self-auto shrink-0 shadow-sm">
+                Buka Buku Panduan Lengkap &rarr;
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>&copy; 2026 <strong>Absaka</strong> • Sistem Presensi & Perpustakaan Digital MA Islamiyah Balen.</p>
+            <div class="flex items-center gap-4 text-slate-400">
+                <span>Versi 2.0 (Build MA Islamiyah Balen)</span>
+                <span>&bull;</span>
+                <a href="#langkah-1" class="hover:text-brand-600 transition">Kembali ke Atas &uarr;</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification for Copy -->
+    <div id="toast" class="fixed bottom-6 right-6 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-xl border border-slate-800 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span id="toast-msg">Teks berhasil disalin!</span>
+    </div>
+
+    <!-- Vanilla Javascript Helpers -->
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-msg');
+            msg.innerText = message || 'Teks berhasil disalin!';
+            toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            }, 2000);
+        }
+
+        function copyToClipboard(text, btnElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Teks disalin: ' + text);
+                if (btnElement) {
+                    const originalText = btnElement.innerText;
+                    btnElement.innerText = 'Disalin!';
+                    btnElement.classList.add('text-brand-700', 'bg-brand-100');
+                    setTimeout(() => {
+                        btnElement.innerText = originalText;
+                        btnElement.classList.remove('text-brand-700', 'bg-brand-100');
+                    }, 1500);
+                }
+            }).catch(err => {
+                showToast('Gagal menyalin teks');
+            });
+        }
+
+        function copySnippet(btnElement) {
+            const snippet = `APP_NAME="Absaka"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://absensi.maisba.sch.id
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database_anda
+DB_USERNAME=nama_user_db_anda
+DB_PASSWORD=kata_sandi_db_anda`;
+            copyToClipboard(snippet, btnElement);
+        }
+    </script>
+</body>
+</html>

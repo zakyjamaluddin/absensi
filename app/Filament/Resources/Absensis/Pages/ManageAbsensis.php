@@ -4,20 +4,78 @@ namespace App\Filament\Resources\Absensis\Pages;
 
 use App\Filament\Resources\Absensis\AbsensiResource;
 use App\Models\Absensi;
+use App\Models\JamSetting;
+use App\Models\Siswa;
+use App\Services\WhatsAppService;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 
 class ManageAbsensis extends ManageRecords
 {
     protected static string $resource = AbsensiResource::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Pastikan santri & guru memiliki record Belum Absen untuk hari ini jika belum absen
+        $user = auth()->user();
+        $kelasId = null;
+        if ($user && $user->hasAnyRole(['Wali Kelas', 'wali_kelas']) && $user->userable instanceof \App\Models\Guru) {
+            $kelasId = $user->userable->kelas?->id;
+        }
+
+        if (! $user?->hasRole('siswa')) {
+            Absensi::ensureDailyRecordsForDate(now()->toDateString(), $kelasId);
+        }
+    }
+
+    public function getDefaultActiveTab(): string | int | null
+    {
+        return 'hari_ini';
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'hari_ini' => Tab::make('Hari Ini')
+                ->icon('heroicon-o-calendar-days')
+                ->badge(fn () => Absensi::whereDate('tanggal', Carbon::today())->count())
+                ->badgeColor('success')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereDate('tanggal', Carbon::today())),
+
+            'kemarin' => Tab::make('Kemarin')
+                ->icon('heroicon-o-calendar')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereDate('tanggal', Carbon::yesterday())),
+
+            'minggu_ini' => Tab::make('Minggu Ini')
+                ->icon('heroicon-o-calendar')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereBetween('tanggal', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])),
+
+            'bulan_ini' => Tab::make('Bulan Ini')
+                ->icon('heroicon-o-calendar')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereMonth('tanggal', Carbon::now()->month)->whereYear('tanggal', Carbon::now()->year)),
+
+            'semua' => Tab::make('Semua Tanggal')
+                ->icon('heroicon-o-archive-box'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
+        $user = auth()->user();
+        if ($user && $user->hasAnyRole(['guru', 'wali_kelas', 'Wali Kelas', 'siswa'])) {
+            return [];
+        }
+
         return [
             Action::make('input_manual')
                 ->label('Input Absen Manual')
@@ -39,7 +97,44 @@ class ManageAbsensis extends ManageRecords
                         return;
                     }
 
-                    Absensi::create($data);
+                    $absensi = Absensi::create($data);
+
+                    if ($absensi->absensable instanceof Siswa) {
+                        if (!empty($absensi->jam_masuk)) {
+                            $settings = JamSetting::first();
+                            WhatsAppService::sendNotifMasukWali($absensi->absensable, $absensi, $settings);
+                        }
+                        if (!empty($absensi->jam_pulang)) {
+                            WhatsAppService::sendNotifPulangWali($absensi->absensable, $absensi);
+                        }
+                        if ($absensi->status_masuk === 'Alpa') {
+                            $settings = JamSetting::first();
+                            $batasAkhir = $settings?->selesai_masuk ?? '08:00';
+                            WhatsAppService::sendNotifAlpaWali($absensi->absensable, $absensi->tanggal, $batasAkhir);
+                        }
+                    } elseif ($absensi->absensable instanceof \App\Models\Guru) {
+                        $settings = JamSetting::first();
+                        $batasTerlambatAcuan = null;
+                        if ($settings) {
+                            if ($settings->mode_absensi_guru === 'jadwal') {
+                                if ($settings->aturan_terlambat_guru === 'jadwal_mengajar') {
+                                    $earliest = $absensi->absensable->getEarliestJamMulai($absensi->tanggal);
+                                    $batasTerlambatAcuan = $earliest ?: ($settings->batas_terlambat_guru ?: $settings->batas_terlambat);
+                                } else {
+                                    $batasTerlambatAcuan = $settings->batas_terlambat_guru ?: $settings->batas_terlambat;
+                                }
+                            } else {
+                                $batasTerlambatAcuan = $settings->batas_terlambat_guru ?: $settings->batas_terlambat;
+                            }
+                        }
+
+                        if (!empty($absensi->jam_masuk)) {
+                            WhatsAppService::sendNotifMasukGuru($absensi->absensable, $absensi, $batasTerlambatAcuan);
+                        }
+                        if (!empty($absensi->jam_pulang)) {
+                            WhatsAppService::sendNotifPulangGuru($absensi->absensable, $absensi);
+                        }
+                    }
 
                     Notification::make()
                         ->title('Berhasil')

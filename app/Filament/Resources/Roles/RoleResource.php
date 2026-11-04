@@ -42,6 +42,11 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     #[Override]
     public static function form(Schema $schema): Schema
     {

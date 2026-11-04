@@ -25,7 +25,7 @@
                 @endphp
 
                 <h1 style="font-size: 1.625rem; font-weight: 800; letter-spacing: -0.025em; margin: 0; color: #ffffff;">
-                    {{ $greeting }}, {{ auth()->user()->name }}! 👋
+                    {{ $greeting }}, {{ auth()->user()?->name ?? 'Pengguna' }}! 👋
                 </h1>
 
                 <p style="font-size: 0.9rem; margin: 0.45rem 0 0 0; color: #f0fdf4; line-height: 1.5;">

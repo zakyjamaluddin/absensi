@@ -7,6 +7,7 @@ use App\Models\Siswa;
 use App\Models\Guru;
 use App\Models\Absensi;
 use App\Models\JamSetting;
+use App\Services\WhatsAppService;
 use Carbon\Carbon;
 use BackedEnum;
 use Filament\Support\Icons\Heroicon;
@@ -18,10 +19,26 @@ class ScanAbsensi extends Page
 
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
+    protected static ?string $navigationLabel = 'Scanner Presensi';
+    protected static ?int $navigationSort = 2;
 
-    // UBAH BARIS INI: Sesuaikan tipenya agar sama persis dengan kelas induk Page
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
 
-    protected static ?int $navigationSort = 1;
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        if ($user->hasAnyRole(['admin_perpustakaan', 'staff_perpustakaan'])) {
+            return false;
+        }
+
+        return $user->hasAnyRole(['admin_absensi', 'staff_absensi']) || $user->can('View:ScanAbsensi');
+    }
 
     protected string $view = 'filament.pages.scan-absensi';
 
@@ -30,6 +47,42 @@ class ScanAbsensi extends Page
     public $scannedCode = ''; // Menampung NIS atau NIP
     public $message = '';
     public $status = 'info'; // 'success', 'danger', 'info'
+    public ?array $lastScanned = null;
+
+    protected function setLastScanned($subject, string $tipeAbsen, string $statusKehadiran, string $statusBadge, ?string $jam = null): void
+    {
+        $now = Carbon::now();
+        if ($subject instanceof Siswa) {
+            $subject->loadMissing('kelas');
+            $this->lastScanned = [
+                'nama' => $subject->nama,
+                'tipe_label' => 'Siswa',
+                'nomor_induk_label' => 'NIS',
+                'nomor_induk' => $subject->nis,
+                'kelas' => $subject->kelas?->nama_kelas ?? 'Tanpa Kelas',
+                'foto' => $subject->foto_url,
+                'tipe_absen' => $tipeAbsen,
+                'status_kehadiran' => $statusKehadiran,
+                'status_badge' => $statusBadge,
+                'jam' => $jam ?: $now->format('H:i:s'),
+                'tanggal' => $now->translatedFormat('d F Y'),
+            ];
+        } elseif ($subject instanceof Guru) {
+            $this->lastScanned = [
+                'nama' => $subject->nama,
+                'tipe_label' => 'Guru / Pendidik',
+                'nomor_induk_label' => 'NIP',
+                'nomor_induk' => $subject->nip ?: '-',
+                'kelas' => 'Tenaga Pengajar',
+                'foto' => $subject->foto_url,
+                'tipe_absen' => $tipeAbsen,
+                'status_kehadiran' => $statusKehadiran,
+                'status_badge' => $statusBadge,
+                'jam' => $jam ?: $now->format('H:i:s'),
+                'tanggal' => $now->translatedFormat('d F Y'),
+            ];
+        }
+    }
 
     // public function processScan()
     // {
@@ -132,19 +185,20 @@ class ScanAbsensi extends Page
     // }
 
 
-    public function processScan()
+    public function processScan(?string $inputCode = null)
     {
-        if (empty($this->scannedCode)) {
+        $code = trim($inputCode ?: $this->scannedCode);
+        $this->scannedCode = '';
+
+        if (empty($code)) {
             return;
         }
 
-        $code = trim($this->scannedCode);
-        $this->scannedCode = '';
-
-        // 1. Cari subjek (Siswa atau Guru)
-        $subject = Siswa::where('nis', $code)->first() ?? Guru::where('nip', $code)->first();
+        // 1. Cari subjek secara cepat dengan eager-loading relasi kelas
+        $subject = Siswa::with('kelas')->where('nis', $code)->first() ?? Guru::where('nip', $code)->first();
 
         if (!$subject) {
+            $this->lastScanned = null;
             $this->message = "ID/Nomor Kartu '{$code}' tidak terdaftar.";
             $this->status = 'danger';
 
@@ -160,6 +214,7 @@ class ScanAbsensi extends Page
         // 2. Ambil Config Jam Aktif
         $settings = JamSetting::first();
         if (!$settings) {
+            $this->lastScanned = null;
             $this->message = "Pengaturan jam absensi belum dikonfigurasi oleh Admin.";
             $this->status = 'danger';
 
@@ -173,6 +228,7 @@ class ScanAbsensi extends Page
         $isPulangWindow = ($timeNow >= $settings->mulai_pulang && $timeNow <= $settings->selesai_pulang);
 
         if (!$isMasukWindow && !$isPulangWindow) {
+            $this->setLastScanned($subject, 'DILUAR JADWAL', 'Diluar Jadwal', 'danger', $now->format('H:i:s'));
             $this->message = "Tidak ada jadwal absen aktif saat ini (Pukul {$now->format('H:i')}).";
             $this->status = 'danger';
 
@@ -189,6 +245,7 @@ class ScanAbsensi extends Page
 
         if ($isMasukWindow) {
             if ($absensi && $absensi->jam_masuk) {
+                $this->setLastScanned($subject, 'MASUK', 'Sudah Absen Masuk', 'info', $absensi->jam_masuk);
                 $this->message = "{$subject->nama} sudah melakukan absen MASUK hari ini.";
                 $this->status = 'info';
 
@@ -197,10 +254,39 @@ class ScanAbsensi extends Page
                 return;
             }
 
-            // Tentukan apakah terlambat
-            $statusKehadiran = ($timeNow <= $settings->batas_terlambat) ? 'Tepat Waktu' : 'Terlambat';
+            // Tentukan batas waktu acuan keterlambatan & status kehadiran
+            $batasTerlambatAcuan = null;
+            if ($subject instanceof Siswa) {
+                $batasTerlambatAcuan = $settings->batas_terlambat;
+                $statusKehadiran = ($timeNow <= Carbon::parse($batasTerlambatAcuan)->format('H:i:s')) ? 'Tepat Waktu' : 'Terlambat';
+            } elseif ($subject instanceof Guru) {
+                if ($settings->mode_absensi_guru === 'jadwal') {
+                    // Mode dinamis: cek jadwal mengajar hari ini
+                    $jadwalHariIni = $subject->getJadwalHariIni($today);
+                    if ($jadwalHariIni->isNotEmpty()) {
+                        if ($settings->aturan_terlambat_guru === 'jadwal_mengajar') {
+                            $earliestJamMulai = $subject->getEarliestJamMulai($today);
+                            $batasTerlambatAcuan = $earliestJamMulai ?: ($settings->batas_terlambat_guru ?: $settings->batas_terlambat);
+                            $statusKehadiran = ($timeNow <= Carbon::parse($batasTerlambatAcuan)->format('H:i:s')) ? 'Tepat Waktu' : 'Terlambat';
+                        } else {
+                            $batasTerlambatAcuan = $settings->batas_terlambat_guru ?: $settings->batas_terlambat;
+                            $statusKehadiran = ($timeNow <= Carbon::parse($batasTerlambatAcuan)->format('H:i:s')) ? 'Tepat Waktu' : 'Terlambat';
+                        }
+                    } else {
+                        // Guru tidak ada jadwal mengajar hari ini: jika hadir tetap dihitung Hadir (Tepat Waktu)
+                        $statusKehadiran = 'Tepat Waktu';
+                        $batasTerlambatAcuan = null;
+                    }
+                } else {
+                    // Mode statis
+                    $batasTerlambatAcuan = $settings->batas_terlambat_guru ?: $settings->batas_terlambat;
+                    $statusKehadiran = ($timeNow <= Carbon::parse($batasTerlambatAcuan)->format('H:i:s')) ? 'Tepat Waktu' : 'Terlambat';
+                }
+            } else {
+                $statusKehadiran = ($timeNow <= Carbon::parse($settings->batas_terlambat)->format('H:i:s')) ? 'Tepat Waktu' : 'Terlambat';
+            }
 
-            Absensi::updateOrCreate(
+            $absensiRecord = Absensi::updateOrCreate(
                 [
                     'tanggal' => $today,
                     'absensable_type' => get_class($subject),
@@ -211,6 +297,16 @@ class ScanAbsensi extends Page
                     'status_masuk' => $statusKehadiran
                 ]
             );
+
+            // JIKA SUBJEK ADALAH SISWA / GURU: Kirim notifikasi WA secara deferred (asynchronous tanpa memblokir latensi scanner)
+            if ($subject instanceof Siswa) {
+                defer(fn () => WhatsAppService::sendNotifMasukWali($subject, $absensiRecord, $settings));
+            } elseif ($subject instanceof Guru) {
+                defer(fn () => WhatsAppService::sendNotifMasukGuru($subject, $absensiRecord, $batasTerlambatAcuan));
+            }
+
+            $statusBadge = ($statusKehadiran === 'Terlambat') ? 'danger' : 'success';
+            $this->setLastScanned($subject, 'MASUK', $statusKehadiran, $statusBadge, $timeNow);
 
             if ($statusKehadiran === 'Terlambat') {
                 $this->message = "Berhasil Absen MASUK (TERLAMBAT): {$subject->nama} (Pukul {$now->format('H:i')}).";
@@ -226,6 +322,7 @@ class ScanAbsensi extends Page
 
         elseif ($isPulangWindow) {
             if ($absensi && $absensi->jam_pulang) {
+                $this->setLastScanned($subject, 'PULANG', 'Sudah Absen Pulang', 'info', $absensi->jam_pulang);
                 $this->message = "{$subject->nama} sudah melakukan absen PULANG hari ini.";
                 $this->status = 'info';
 
@@ -234,15 +331,26 @@ class ScanAbsensi extends Page
                 return;
             }
 
-            Absensi::updateOrCreate(
+            $absensiRecord = Absensi::updateOrCreate(
                 [
                     'tanggal' => $today,
                     'absensable_type' => get_class($subject),
                     'absensable_id' => $subject->id,
                 ],
-                ['jam_pulang' => $timeNow]
+                [
+                    'jam_pulang' => $timeNow,
+                    'status_pulang' => 'Pulang',
+                ]
             );
 
+            // JIKA SUBJEK ADALAH SISWA / GURU: Kirim notifikasi WA secara deferred (non-blocking)
+            if ($subject instanceof Siswa) {
+                defer(fn () => WhatsAppService::sendNotifPulangWali($subject, $absensiRecord));
+            } elseif ($subject instanceof Guru) {
+                defer(fn () => WhatsAppService::sendNotifPulangGuru($subject, $absensiRecord));
+            }
+
+            $this->setLastScanned($subject, 'PULANG', 'Pulang', 'success', $timeNow);
             $this->message = "Berhasil Absen PULANG: {$subject->nama} (Pukul {$now->format('H:i')}).";
             $this->status = 'success';
 

@@ -21,12 +21,10 @@ use UnitEnum;
 class HariLiburResource extends Resource
 {
     protected static ?string $model = HariLibur::class;
-    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
-
-
+    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan & Sistem';
+    protected static ?int $navigationSort = 2;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
-
-    protected static ?string $navigationLabel = 'Kalender Libur';
+    protected static ?string $navigationLabel = 'Kalender Hari Libur';
     protected static ?string $pluralModelLabel = 'Kalender Libur';
     protected static ?string $modelLabel = 'Hari Libur';
 
@@ -58,7 +56,8 @@ class HariLiburResource extends Resource
 
                 Tables\Columns\TextColumn::make('keterangan')
                     ->label('Keterangan')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap(),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([

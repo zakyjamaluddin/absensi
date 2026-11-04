@@ -24,7 +24,8 @@ class SiswaResource extends Resource
 {
     protected static ?string $model = Siswa::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Data';
+    protected static string | UnitEnum | null $navigationGroup = 'Data Akademik';
+    protected static ?int $navigationSort = 1;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
@@ -36,6 +37,18 @@ class SiswaResource extends Resource
     {
         return $schema
             ->components([
+                Forms\Components\FileUpload::make('foto')
+                    ->label('Foto Siswa')
+                    ->image()
+                    ->avatar()
+                    ->directory('siswas')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->imageEditor()
+                    ->maxSize(2048)
+                    ->helperText('Format JPG/PNG/WEBP, maksimal 2MB. Disajikan berbentuk bulat/avatar.')
+                    ->columnSpanFull(),
+
                 Forms\Components\TextInput::make('nis')
                     ->label('NIS / No. Kartu')
                     ->required()
@@ -56,6 +69,18 @@ class SiswaResource extends Resource
                     ->preload()
                     ->required()
                     ->placeholder('Pilih Kelas Siswa'),
+
+                Forms\Components\TextInput::make('nomor_wa_wali')
+                    ->label('No. WhatsApp Wali Murid')
+                    ->tel()
+                    ->placeholder('Contoh: 081234567890')
+                    ->helperText('Nomor WhatsApp wali untuk menerima notifikasi absensi kehadiran (format: 08xxx / 628xxx).')
+                    ->maxLength(25),
+
+                Forms\Components\Toggle::make('is_notif_wa_aktif')
+                    ->label('Kirim Notifikasi WA ke Wali')
+                    ->helperText('Aktifkan agar wali murid siswa ini menerima notifikasi kehadiran via WhatsApp.')
+                    ->default(true),
             ]);
     }
 
@@ -63,6 +88,11 @@ class SiswaResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('foto')
+                    ->label('Foto')
+                    ->circular()
+                    ->disk('public')
+                    ->defaultImageUrl(asset('images/default-avatar.svg')),
 
                 Tables\Columns\TextColumn::make('nama')
                     ->label('Nama Siswa')
@@ -77,6 +107,18 @@ class SiswaResource extends Resource
                     ->label('Kelas')
                     ->searchable()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('nomor_wa_wali')
+                    ->label('No. WA Wali')
+                    ->searchable()
+                    ->placeholder('Belum diatur')
+                    ->visibleFrom('md')
+                    ->toggleable(),
+
+                Tables\Columns\ToggleColumn::make('is_notif_wa_aktif')
+                    ->label('Notif WA')
+                    ->visibleFrom('md')
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('kelas_id')
@@ -85,6 +127,7 @@ class SiswaResource extends Resource
             ])
             ->actions([
                 ActionGroup::make([
+                    static::getRekapAbsensiAction(),
                     EditAction::make(),
                     DeleteAction::make(),
                     Action::make('unduh_qr')
@@ -106,6 +149,48 @@ class SiswaResource extends Resource
                 ]),
             ])
             ->bulkActions([
+            ]);
+    }
+
+    public static function getRekapAbsensiAction(): Action
+    {
+        return Action::make('rekap_absensi')
+            ->label('Rekap Absensi')
+            ->icon('heroicon-o-chart-bar')
+            ->color('success')
+            ->modalHeading(fn (Siswa $record) => "Rekap Presensi Siswa: {$record->nama}")
+            ->modalSubheading(fn (Siswa $record) => "NIS: {$record->nis} • Kelas: " . ($record->kelas?->nama_kelas ?? 'Tanpa Kelas'))
+            ->modalWidth('4xl')
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Tutup')
+            ->form([
+                \Filament\Schemas\Components\Grid::make(3)->schema([
+                    Forms\Components\Select::make('modal_periode')
+                        ->label('Pilih Periode')
+                        ->options([
+                            'bulan_ini' => 'Bulan Ini (' . now()->translatedFormat('F Y') . ')',
+                            'tahun_ini' => 'Tahun Ini (' . now()->year . ')',
+                            'semua' => 'Semua Waktu',
+                            'custom' => 'Custom (Pilih Rentang Tanggal)',
+                        ])
+                        ->default('bulan_ini')
+                        ->live(),
+
+                    Forms\Components\DatePicker::make('modal_dari')
+                        ->label('Dari Tanggal')
+                        ->default(now()->startOfMonth()->toDateString())
+                        ->visible(fn ($get) => $get('modal_periode') === 'custom')
+                        ->live(),
+
+                    Forms\Components\DatePicker::make('modal_sampai')
+                        ->label('Sampai Tanggal')
+                        ->default(now()->toDateString())
+                        ->visible(fn ($get) => $get('modal_periode') === 'custom')
+                        ->live(),
+                ]),
+
+                Forms\Components\ViewField::make('rekap_view')
+                    ->view('filament.components.modal-rekap-absensi'),
             ]);
     }
 

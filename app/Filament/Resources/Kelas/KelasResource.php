@@ -21,13 +21,15 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class KelasResource extends Resource
 {
     protected static ?string $model = Kelas::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Data';
+    protected static string | UnitEnum | null $navigationGroup = 'Data Akademik';
+    protected static ?int $navigationSort = 3;
 
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
@@ -78,9 +80,11 @@ class KelasResource extends Resource
             ])
             ->actions([
                 ActionGroup::make([
-                    EditAction::make(),
-                    DeleteAction::make(),
-                    ViewAction::make(), // <--- Tambahkan tombol View
+                    EditAction::make()
+                        ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
+                    DeleteAction::make()
+                        ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
+                    ViewAction::make(),
                 ]),
             ])
             ->bulkActions([
@@ -181,5 +185,19 @@ class KelasResource extends Resource
         return [
             SiswasRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        // Jika Wali Kelas, hanya tampilkan kelas yang ia ampu
+        if ($user && $user->hasAnyRole(['wali_kelas', 'Wali Kelas'])) {
+            $guruId = ($user->userable instanceof \App\Models\Guru) ? $user->userable->id : null;
+            return $query->where('wali_kelas_id', $guruId);
+        }
+
+        return $query;
     }
 }

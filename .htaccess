@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+    # Izinkan FollowSymLinks agar symlink folder storage dapat diakses Apache di hosting
+    Options +FollowSymLinks -Indexes
+
+    RewriteEngine On
+
+    # Proteksi file sensitif (.env, artisan, composer.json, dll)
+    <FilesMatch "^\.env|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|README\.md">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+
+    # Blokir akses ke file & direktori tersembunyi (dotfiles), kecuali .well-known untuk sertifikat SSL
+    RewriteRule (^|/)\.(?!well-known) - [F]
+
+    # Akses langsung untuk tutorial.html jika dipanggil di root
+    RewriteCond %{REQUEST_URI} ^/tutorial\.html [NC]
+    RewriteRule ^ - [L]
+
+    # Alihkan seluruh request lainnya secara otomatis ke folder public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

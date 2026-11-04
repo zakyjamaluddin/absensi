@@ -21,38 +21,57 @@ class AttendanceStatsOverview extends BaseWidget
         // \App\Models\Absensi::autoProcessAlpa();
 
         $today = Carbon::today()->toDateString();
+        $user = auth()->user();
+
+        // Cek apakah user adalah Wali Kelas dengan kelas binaan aktif
+        $isWaliKelas = $user && $user->hasAnyRole(['wali_kelas', 'Wali Kelas']);
+        $kelas = ($isWaliKelas && $user->userable instanceof Guru) ? $user->userable->kelas : null;
+        $siswaIds = $kelas ? $kelas->siswas()->pluck('id') : null;
 
         // 1. HITUNG SISWA SUDAH MASUK HARI INI (Tepat Waktu + Terlambat)
-        $sudahMasukCount = Absensi::where('tanggal', $today)
+        $sudahMasukQuery = Absensi::where('tanggal', $today)
             ->where('absensable_type', Siswa::class)
-            ->whereIn('status_masuk', ['Tepat Waktu', 'Terlambat'])
-            ->count();
+            ->whereIn('status_masuk', ['Tepat Waktu', 'Terlambat']);
+        if ($siswaIds) {
+            $sudahMasukQuery->whereIn('absensable_id', $siswaIds);
+        }
+        $sudahMasukCount = $sudahMasukQuery->count();
 
         // 2. HITUNG SISWA TERLAMBAT HARI INI
-        $terlambatCount = Absensi::where('tanggal', $today)
+        $terlambatQuery = Absensi::where('tanggal', $today)
             ->where('absensable_type', Siswa::class)
-            ->where('status_masuk', 'Terlambat')
-            ->count();
+            ->where('status_masuk', 'Terlambat');
+        if ($siswaIds) {
+            $terlambatQuery->whereIn('absensable_id', $siswaIds);
+        }
+        $terlambatCount = $terlambatQuery->count();
 
         // 3. HITUNG SISWA ALPA HARI INI
-        $alpaCount = Absensi::where('tanggal', $today)
+        $alpaQuery = Absensi::where('tanggal', $today)
             ->where('absensable_type', Siswa::class)
-            ->where('status_masuk', 'Alpa')
-            ->count();
+            ->where('status_masuk', 'Alpa');
+        if ($siswaIds) {
+            $alpaQuery->whereIn('absensable_id', $siswaIds);
+        }
+        $alpaCount = $alpaQuery->count();
+
+        $descMasuk = $kelas ? "Siswa {$kelas->nama_kelas} yang sudah hadir" : 'Total siswa yang sudah hadir di kelas';
+        $descTelat = $kelas ? "Siswa {$kelas->nama_kelas} scan melewati jam masuk" : 'Siswa yang scan melewati jam masuk';
+        $descAlpa = $kelas ? "Siswa {$kelas->nama_kelas} membolos/alpa hari ini" : 'Siswa yang membolos/tidak hadir hari ini';
 
         return [
             Stat::make('Sudah Masuk Hari Ini', $sudahMasukCount . ' Siswa')
-                ->description('Total siswa yang sudah hadir di kelas')
+                ->description($descMasuk)
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
 
             Stat::make('Terlambat Hari Ini', $terlambatCount . ' Siswa')
-                ->description('Siswa yang scan melewati jam masuk')
+                ->description($descTelat)
                 ->descriptionIcon('heroicon-m-clock')
                 ->color($terlambatCount > 0 ? 'warning' : 'gray'),
 
             Stat::make('Alpa Hari Ini', $alpaCount . ' Siswa')
-                ->description('Siswa yang membolos/tidak hadir hari ini')
+                ->description($descAlpa)
                 ->descriptionIcon('heroicon-m-user-minus')
                 ->color($alpaCount > 0 ? 'danger' : 'gray'),
         ];
