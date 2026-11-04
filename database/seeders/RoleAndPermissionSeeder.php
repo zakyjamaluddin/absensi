@@ -22,24 +22,36 @@ class RoleAndPermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 1. PASTIKAN SELURUH PERMISSION ENTITAS BARU TERSEDIA
-        $newPermissions = [
+        // 1. PASTIKAN SELURUH PERMISSION ENTITAS & HALAMAN SISTEM TERSEDIA
+        $entities = [
+            'Absensi', 'AjukanIzin', 'Buku', 'Guru', 'HariLibur',
+            'JadwalGuruPiket', 'JadwalMengajar', 'JamSetting', 'Kelas',
+            'KunjunganPerpustakaan', 'PeminjamanBuku', 'PengajuanIzin',
+            'PerpustakaanSetting', 'PresensiKelasSaya', 'Role', 'Siswa',
+            'User', 'WaSetting',
+        ];
+        $actions = ['ViewAny', 'View', 'Create', 'Update', 'Delete', 'DeleteAny'];
+
+        foreach ($entities as $entity) {
+            foreach ($actions as $action) {
+                Permission::firstOrCreate(['name' => "{$action}:{$entity}", 'guard_name' => 'web']);
+            }
+        }
+
+        $pagePermissions = [
             'View:Dashboard',
-            'ViewAny:JadwalGuruPiket',
-            'View:JadwalGuruPiket',
-            'Create:JadwalGuruPiket',
-            'Update:JadwalGuruPiket',
-            'Delete:JadwalGuruPiket',
-            'DeleteAny:JadwalGuruPiket',
-            'ViewAny:PengajuanIzin',
-            'View:PengajuanIzin',
-            'Create:PengajuanIzin',
-            'Update:PengajuanIzin',
-            'Delete:PengajuanIzin',
-            'DeleteAny:PengajuanIzin',
+            'View:DashboardPerpustakaan',
+            'View:ScanPerpustakaan',
+            'View:LeaderboardLiterasi',
+            'View:Dokumentasi',
+            'View:ScanAbsensi',
+            'View:LeaderboardKedisiplinan',
+            'View:AttendanceStatsOverview',
+            'View:HeaderGreetingWidget',
+            'View:RecentAbsensisTable',
         ];
 
-        foreach ($newPermissions as $perm) {
+        foreach ($pagePermissions as $perm) {
             Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
         }
 
@@ -252,10 +264,12 @@ class RoleAndPermissionSeeder extends Seeder
             $user->syncRoles([$roleName]);
         }
 
-        // Pastikan akun admin utama (admin@maisba.sch.id) tetap memiliki super_admin
-        $mainAdmin = User::where('email', 'admin@maisba.sch.id')->first();
-        if ($mainAdmin) {
-            $mainAdmin->syncRoles(['super_admin']);
+        // Pastikan akun admin utama (User ID 1 atau admin@maisba.sch.id / admin@maisba.com) tetap memiliki super_admin
+        $adminUsers = User::where('id', 1)
+            ->orWhereIn('email', ['admin@maisba.sch.id', 'admin@maisba.com'])
+            ->get();
+        foreach ($adminUsers as $admin) {
+            $admin->assignRole('super_admin');
         }
 
         // Clear cache permissions lagi
