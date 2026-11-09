@@ -31,11 +31,28 @@ class ProcessDailyAlpa extends Command
         $currentDayName = Carbon::today()->englishDayOfWeek;
 
         // Ambil array pilihan ganda dari database (jika kosong, default-kan ke array berisi Friday)
-        $liburPekanan = $jamSetting->libur_pekanan ?? ['Friday'];
+        $liburPekanan = $jamSetting?->libur_pekanan ?? ['Friday'];
+        if (!is_array($liburPekanan)) {
+            $decoded = is_string($liburPekanan) ? json_decode($liburPekanan, true) : null;
+            $liburPekanan = is_array($decoded) ? $decoded : (array) $liburPekanan;
+        }
+        $normalizedLibur = array_map('strtolower', (array) $liburPekanan);
 
-        // CEK 1: Apakah hari ini (misal 'Friday') ada di dalam daftar array hari libur pilihan ganda?
+        $dayMap = [
+            'Sunday'    => ['sunday', 'ahad', 'minggu'],
+            'Monday'    => ['monday', 'senin'],
+            'Tuesday'   => ['tuesday', 'selasa'],
+            'Wednesday' => ['wednesday', 'rabu'],
+            'Thursday'  => ['thursday', 'kamis'],
+            'Friday'    => ['friday', 'jumat'],
+            'Saturday'  => ['saturday', 'sabtu'],
+        ];
+        $aliases = $dayMap[$currentDayName] ?? [strtolower($currentDayName)];
+        $isLiburPekananHariIni = (bool) array_intersect($aliases, $normalizedLibur);
+
+        // CEK 1: Apakah hari ini (misal 'Friday' / 'Sunday') ada di dalam daftar array hari libur pilihan ganda?
         // (Kecuali jika dipicu secara MANUAL lewat tombol)
-        if (!$this->option('manual') && is_array($liburPekanan) && in_array($currentDayName, $liburPekanan)) {
+        if (!$this->option('manual') && $isLiburPekananHariIni) {
             $this->info("Hari ini adalah hari {$currentDayName} (Libur Pekanan). Proses Alpa diabaikan.");
             return Command::SUCCESS;
         }

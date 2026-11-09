@@ -6,6 +6,7 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Absensi;
 use App\Models\HariLibur;
+use App\Models\JamSetting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -23,6 +24,49 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 
 class EksporAbsensiController extends Controller
 {
+    /**
+     * Dapatkan daftar hari libur pekanan dari konfigurasi JamSetting
+     */
+    protected function getLiburPekanan(): array
+    {
+        $jamSetting = JamSetting::first();
+        $liburPekanan = $jamSetting?->libur_pekanan ?? ['Friday'];
+
+        if (!is_array($liburPekanan)) {
+            $decoded = is_string($liburPekanan) ? json_decode($liburPekanan, true) : null;
+            $liburPekanan = is_array($decoded) ? $decoded : (array) $liburPekanan;
+        }
+
+        return array_map('strtolower', (array) $liburPekanan);
+    }
+
+    /**
+     * Cek apakah suatu tanggal merupakan libur pekanan berdasarkan konfigurasi
+     */
+    protected function isLiburPekanan(Carbon $date, array $liburPekanan): bool
+    {
+        $dayName = $date->format('l'); // 'Sunday', 'Monday', 'Tuesday', ...
+        $dayMap = [
+            'Sunday'    => ['sunday', 'ahad', 'minggu'],
+            'Monday'    => ['monday', 'senin'],
+            'Tuesday'   => ['tuesday', 'selasa'],
+            'Wednesday' => ['wednesday', 'rabu'],
+            'Thursday'  => ['thursday', 'kamis'],
+            'Friday'    => ['friday', 'jumat'],
+            'Saturday'  => ['saturday', 'sabtu'],
+        ];
+
+        $aliases = $dayMap[$dayName] ?? [strtolower($dayName)];
+
+        foreach ($aliases as $alias) {
+            if (in_array($alias, $liburPekanan, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function ekspor(Kelas $kelas, $bulan, $tahun)
     {
         // 1. Tentukan jumlah hari pada bulan terpilih
@@ -45,8 +89,20 @@ class EksporAbsensiController extends Controller
             "Expires" => "0"
         ];
 
+        // Preload konfigurasi libur pekanan & daftar hari libur nasional dalam bulan terpilih
+        $liburPekanan = $this->getLiburPekanan();
+        $tanggalAwal = $firstDayOfMonth->copy()->startOfMonth()->toDateString();
+        $tanggalAkhir = $firstDayOfMonth->copy()->endOfMonth()->toDateString();
+        $hariLibur = HariLibur::whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir])
+            ->pluck('tanggal')
+            ->map(function ($tanggal) {
+                return Carbon::parse($tanggal)->format('Y-m-d');
+            })
+            ->flip()
+            ->toArray();
+
         // 4. Proses render HTML Table bergaya inline CSS untuk Excel
-        $callback = function() use ($kelas, $bulan, $tahun, $daysInMonth, $namaBulanIndo, $siswas) {
+        $callback = function() use ($kelas, $bulan, $tahun, $daysInMonth, $namaBulanIndo, $siswas, $liburPekanan, $hariLibur) {
             $output = fopen('php://output', 'w');
 
             // Tulis tag pembuka HTML & CSS untuk excel
@@ -118,13 +174,13 @@ class EksporAbsensiController extends Controller
                     $currentDateString = sprintf('%s-%s-%02d', $tahun, $bulan, $d);
                     $carbonDate = Carbon::parse($currentDateString);
 
-                    // A. LOGIKA UTAMA: Jumat Auto Libur
-                    $isFriday = $carbonDate->isFriday();
+                    // A. LOGIKA UTAMA: Cek libur pekanan (sesuai setelan di JamSetting, misal: Ahad / Jumat)
+                    $isWeeklyHoliday = $this->isLiburPekanan($carbonDate, $liburPekanan);
 
                     // B. Cek apakah ada di Kalender Hari Libur database
-                    $isHolidayCalendar = HariLibur::where('tanggal', $currentDateString)->exists();
+                    $isHolidayCalendar = isset($hariLibur[$currentDateString]);
 
-                    if ($isFriday || $isHolidayCalendar) {
+                    if ($isWeeklyHoliday || $isHolidayCalendar) {
                         $html .= '<td class="libur">L</td>';
                     } else {
                         // Cari log absen siswa pada tanggal ini
@@ -197,7 +253,19 @@ class EksporAbsensiController extends Controller
             "Expires" => "0"
         ];
 
-        $callback = function() use ($kelasQuery, $bulan, $tahun, $daysInMonth, $namaBulanIndo) {
+        // Preload konfigurasi libur pekanan & daftar hari libur
+        $liburPekanan = $this->getLiburPekanan();
+        $tanggalAwal = $firstDayOfMonth->copy()->startOfMonth()->toDateString();
+        $tanggalAkhir = $firstDayOfMonth->copy()->endOfMonth()->toDateString();
+        $hariLibur = HariLibur::whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir])
+            ->pluck('tanggal')
+            ->map(function ($tanggal) {
+                return Carbon::parse($tanggal)->format('Y-m-d');
+            })
+            ->flip()
+            ->toArray();
+
+        $callback = function() use ($kelasQuery, $bulan, $tahun, $daysInMonth, $namaBulanIndo, $liburPekanan, $hariLibur) {
             $output = fopen('php://output', 'w');
 
             // HEADER XML KHUSUS: Menginstruksikan Excel untuk memecah halaman menjadi Sheet/Tab di bagian bawah
@@ -297,10 +365,10 @@ class EksporAbsensiController extends Controller
                     for ($d = 1; $d <= $daysInMonth; $d++) {
                         $currentDateString = sprintf('%s-%s-%02d', $tahun, $bulan, $d);
                         $carbonDate = Carbon::parse($currentDateString);
-                        $isFriday = $carbonDate->isFriday();
-                        $isHolidayCalendar = HariLibur::where('tanggal', $currentDateString)->exists();
+                        $isWeeklyHoliday = $this->isLiburPekanan($carbonDate, $liburPekanan);
+                        $isHolidayCalendar = isset($hariLibur[$currentDateString]);
 
-                        if ($isFriday || $isHolidayCalendar) {
+                        if ($isWeeklyHoliday || $isHolidayCalendar) {
                             $html .= '<td class="libur">L</td>';
                         } else {
                             $absensi = Absensi::where('tanggal', $currentDateString)
@@ -433,6 +501,8 @@ public function eksporSemuaKelas($bulan, $tahun)
             return Carbon::parse($tanggal)->format('Y-m-d');
         })
         ->flip();
+
+    $liburPekanan = $this->getLiburPekanan();
 
     /*
     |--------------------------------------------------------------------------
@@ -1063,11 +1133,11 @@ public function eksporSemuaKelas($bulan, $tahun)
 
                 /*
                 |--------------------------------------------------------------------------
-                | CEK HARI JUMAT
+                | CEK LIBUR PEKANAN & KALENDER LIBUR
                 |--------------------------------------------------------------------------
                 */
 
-                $isFriday = $carbonDate->isFriday();
+                $isWeeklyHoliday = $this->isLiburPekanan($carbonDate, $liburPekanan);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1085,7 +1155,7 @@ public function eksporSemuaKelas($bulan, $tahun)
                 |--------------------------------------------------------------------------
                 */
 
-                if ($isFriday || $isHoliday) {
+                if ($isWeeklyHoliday || $isHoliday) {
 
                     $sheet->setCellValue(
                         "{$column}{$row}",
