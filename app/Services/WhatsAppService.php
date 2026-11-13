@@ -300,6 +300,41 @@ class WhatsAppService
     }
 
     /**
+     * Dapatkan daftar nomor WhatsApp tujuan rekap alpa (Admin/Kepsek/Piket)
+     * Mengambil dari WaSetting::nomor_wa_rekap_alpa (bisa multi nomor dipisah koma),
+     * atau fallback ke Guru Super Admin jika kosong.
+     *
+     * @return string[]
+     */
+    public static function getAdminRecapPhones(?WaSetting $setting = null): array
+    {
+        $setting = $setting ?? WaSetting::first();
+        $phones = [];
+
+        if ($setting && !empty($setting->nomor_wa_rekap_alpa)) {
+            $rawPhones = explode(',', $setting->nomor_wa_rekap_alpa);
+            foreach ($rawPhones as $raw) {
+                $trimmed = trim($raw);
+                if (!empty($trimmed)) {
+                    $phones[] = $trimmed;
+                }
+            }
+        }
+
+        // Fallback jika belum diisi custom nomor: cari dari user super_admin yang bertipe Guru
+        if (empty($phones)) {
+            $adminUsers = User::role('super_admin')->get();
+            foreach ($adminUsers as $admin) {
+                if ($admin->userable instanceof Guru && !empty($admin->userable->no_hp)) {
+                    $phones[] = trim($admin->userable->no_hp);
+                }
+            }
+        }
+
+        return array_values(array_unique($phones));
+    }
+
+    /**
      * Kirim Laporan Harian Guru Alpa ke WhatsApp Admin Sekolah
      */
     public static function sendReportGuruAlpa(array $guruAlpaList, string $tanggal): array
@@ -335,21 +370,19 @@ class WhatsAppService
         $message .= "📊 *Total Guru Tidak Hadir: {$count} Orang.*\n\n";
         $message .= "_Laporan dikirim otomatis oleh Sistem Absensi Digital._";
 
-        // Kirim ke semua super_admin
-        $adminUsers = User::role('super_admin')->get();
+        // Kirim ke nomor tujuan rekap alpa
+        $targetPhones = self::getAdminRecapPhones($setting);
         $sentCount = 0;
 
-        foreach ($adminUsers as $admin) {
-            if ($admin->userable instanceof Guru && !empty($admin->userable->no_hp)) {
-                self::send($admin->userable->no_hp, $message);
-                $sentCount++;
-            }
+        foreach ($targetPhones as $phone) {
+            self::send($phone, $message);
+            $sentCount++;
         }
 
         return [
             'success' => true,
             'sent_count' => $sentCount,
-            'message' => "Laporan Guru Alpa terkirim ke {$sentCount} Admin.",
+            'message' => "Laporan Guru Alpa terkirim ke {$sentCount} nomor tujuan.",
         ];
     }
 }

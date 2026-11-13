@@ -185,12 +185,16 @@ class ProcessDailyAlpa extends Command
         $this->info("Sukses mencatat {$guruAlpaCount} guru sebagai Alpa hari ini (Mode Absensi Guru: {$modeGuru}).");
 
         // 6. Susun & Kirim Laporan WhatsApp Siswa ke Admin
-        if ($count > 0) {
-            $alpaRecords = Absensi::where('tanggal', $today)
-                ->where('status_masuk', 'Alpa')
-                ->where('absensable_type', Siswa::class)
-                ->get();
+        $alpaRecords = Absensi::where('tanggal', $today)
+            ->where('status_masuk', 'Alpa')
+            ->where('absensable_type', Siswa::class)
+            ->with(['absensable.kelas'])
+            ->get();
 
+        $totalSiswaAlpa = $alpaRecords->count();
+        $isNotifSiswaAlpaAktif = $waSettings ? ($waSettings->notif_wa_admin_rekap_alpa ?? true) : true;
+
+        if ($totalSiswaAlpa > 0 && $isNotifSiswaAlpaAktif) {
             $rekapByKelas = [];
             foreach ($alpaRecords as $record) {
                 $siswa = $record->absensable;
@@ -214,34 +218,56 @@ class ProcessDailyAlpa extends Command
             }
 
             $message .= "--------------------------------------------\n";
-            $message .= "📊 *Total Siswa Alpa Hari Ini: {$count} Santri.*\n\n";
+            $message .= "📊 *Total Siswa Alpa Hari Ini: {$totalSiswaAlpa} Santri.*\n\n";
             $message .= "_Laporan dikirim " . ($this->option('manual') ? 'manual oleh Admin' : 'otomatis oleh Sistem') . " Absensi Digital PP._";
 
-            // Kirim ke semua Guru ber-role 'super_admin'
-            $adminUsers = User::role('super_admin')->get();
+            // Kirim ke nomor tujuan rekap alpa (Admin/Kepsek/Piket)
+            $targetPhones = WhatsAppService::getAdminRecapPhones($waSettings);
 
             $waCount = 0;
-            foreach ($adminUsers as $user) {
-                if ($user->userable instanceof Guru) {
-                    $guru = $user->userable;
-                    if (!empty($guru->no_hp)) {
-                        WhatsAppService::send($guru->no_hp, $message);
-                        $waCount++;
+            foreach ($targetPhones as $phone) {
+                WhatsAppService::send($phone, $message);
+                $waCount++;
+            }
+
+            $this->info("Laporan WhatsApp siswa berhasil dikirim ke {$waCount} nomor tujuan.");
+        } elseif (!$isNotifSiswaAlpaAktif) {
+            $this->info("Fitur notifikasi rekap siswa alpa ke WhatsApp dinonaktifkan di pengaturan WA.");
+        }
+
+        // 7. Susun & Kirim Laporan WhatsApp Guru Alpa ke Admin
+        if ($waSettings->report_guru_alpa) {
+            // Jika dalam satu eksekusi belum terkumpul (misal saat manual re-run), ambil semua guru alpa hari ini
+            if (empty($guruAlpaList)) {
+                $guruAlpaRecords = Absensi::where('tanggal', $today)
+                    ->where('status_masuk', 'Alpa')
+                    ->where('absensable_type', Guru::class)
+                    ->with('absensable')
+                    ->get();
+
+                foreach ($guruAlpaRecords as $rec) {
+                    $g = $rec->absensable;
+                    if ($g) {
+                        $jadwalStr = '';
+                        if ($modeGuru === 'jadwal') {
+                            $jadwalHariIni = $g->getJadwalHariIni($today);
+                            $jadwalStr = $jadwalHariIni->map(fn ($j) => "Jam ke-{$j->jam_ke} ({$j->mata_pelajaran})")->implode(', ');
+                        }
+                        $guruAlpaList[] = [
+                            'nama' => $g->nama,
+                            'nip' => $g->nip,
+                            'jadwal' => $jadwalStr,
+                        ];
                     }
                 }
             }
 
-            $this->info("Laporan WhatsApp siswa berhasil dikirim ke {$waCount} nomor Guru Admin.");
-        }
-
-        // 7. Susun & Kirim Laporan WhatsApp Guru Alpa ke Admin
-        if ($guruAlpaCount > 0) {
-            if ($waSettings->report_guru_alpa) {
+            if (count($guruAlpaList) > 0) {
                 $reportRes = WhatsAppService::sendReportGuruAlpa($guruAlpaList, $today);
                 $this->info($reportRes['message'] ?? 'Laporan Guru Alpa diproses.');
-            } else {
-                $this->info('Fitur auto report Guru Alpa dinonaktifkan di pengaturan WA.');
             }
+        } else {
+            $this->info('Fitur auto report Guru Alpa dinonaktifkan di pengaturan WA.');
         }
 
         return Command::SUCCESS;

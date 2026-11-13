@@ -17,6 +17,7 @@ class WaSetting extends Model
             'notif_wa_guru_masuk' => 'boolean',
             'notif_wa_guru_pulang' => 'boolean',
             'report_guru_alpa' => 'boolean',
+            'notif_wa_admin_rekap_alpa' => 'boolean',
         ];
     }
 

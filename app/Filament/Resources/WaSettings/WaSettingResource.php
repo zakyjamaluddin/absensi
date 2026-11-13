@@ -68,6 +68,18 @@ class WaSettingResource extends Resource
                             ->required()
                             // Input jam hanya muncul jika admin memilih metode "Otomatis"
                             ->visible(fn (callable $get) => $get('tipe_proses_alpa') === 'Otomatis'),
+
+                        TextInput::make('nomor_wa_rekap_alpa')
+                            ->label('Nomor WhatsApp Penerima Rekap Alpa')
+                            ->placeholder('Contoh: 08123456789 atau 08123456789, 08987654321')
+                            ->helperText('Nomor WhatsApp tujuan untuk menerima rekap harian siswa & guru alpa (misal: Kepala Sekolah, Guru Piket, atau Admin). Pisahkan dengan tanda koma (,) jika lebih dari satu nomor. Jika dikosongkan, sistem akan otomatis mengirimkan ke nomor HP Guru yang ber-role Super Admin.')
+                            ->maxLength(255)
+                            ->nullable(),
+
+                        Toggle::make('notif_wa_admin_rekap_alpa')
+                            ->label('Kirim Rekap Siswa Alpa ke WhatsApp')
+                            ->helperText('Kirim rekap harian daftar siswa yang membolos (alpa) per kelas ke nomor WhatsApp penerima rekap.')
+                            ->default(true),
                     ])->columns(1),
 
                 Section::make('Notifikasi WhatsApp ke Wali Murid')
@@ -136,6 +148,14 @@ class WaSettingResource extends Resource
 
                 ToggleColumn::make('report_guru_alpa')
                     ->label('Report Guru Alpa'),
+
+                ToggleColumn::make('notif_wa_admin_rekap_alpa')
+                    ->label('Rekap Siswa'),
+
+                TextColumn::make('nomor_wa_rekap_alpa')
+                    ->label('Penerima Rekap Alpa')
+                    ->placeholder('Guru Super Admin')
+                    ->limit(25),
             ])
             ->filters([
                 //
