@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Kelas\RelationManagers;
 
 use App\Models\Absensi;
 use App\Models\Siswa;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -121,7 +122,7 @@ class SiswasRelationManager extends RelationManager
                     ->visible(fn () => !auth()->user()?->hasAnyRole(['wali_kelas', 'Wali Kelas'])),
             ])
             ->actions([
-                Tables\Actions\Action::make('chat_wa')
+                Action::make('chat_wa')
                     ->label('Chat WA')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
                     ->color('success')

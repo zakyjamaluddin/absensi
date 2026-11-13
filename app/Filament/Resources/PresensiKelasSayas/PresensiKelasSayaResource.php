@@ -229,7 +229,7 @@ class PresensiKelasSayaResource extends Resource
             ])
             ->actions([
                 // 1. Aksi Pintar: Chat WhatsApp Wali Murid
-                Tables\Actions\Action::make('chat_wa')
+                Action::make('chat_wa')
                     ->label('Chat WA')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
                     ->color('success')
@@ -258,7 +258,7 @@ class PresensiKelasSayaResource extends Resource
 
                 // 2. Aksi Tandai Izin / Sakit jika wali murid lapor langsung ke wali kelas
                 ActionGroup::make([
-                    Tables\Actions\Action::make('tandai_sakit')
+                    Action::make('tandai_sakit')
                         ->label('Tandai Sakit')
                         ->icon('heroicon-o-heart')
                         ->color('info')
@@ -278,7 +278,7 @@ class PresensiKelasSayaResource extends Resource
                                 ->send();
                         }),
 
-                    Tables\Actions\Action::make('tandai_izin')
+                    Action::make('tandai_izin')
                         ->label('Tandai Izin')
                         ->icon('heroicon-o-envelope-open')
                         ->color('warning')
@@ -298,7 +298,7 @@ class PresensiKelasSayaResource extends Resource
                                 ->send();
                         }),
 
-                    Tables\Actions\Action::make('tandai_hadir')
+                    Action::make('tandai_hadir')
                         ->label('Tandai Hadir Manual')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
